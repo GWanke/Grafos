@@ -1,6 +1,7 @@
 import numpy as np
 from collections import deque as dq
-
+import pytest
+import unittest
 
 class Vertice():
 	def __init__(self, no, cor = None, pai = None, dist = None):
@@ -30,6 +31,7 @@ class Grafo():
 	def __init__(self):
 		self.vert_dict = {}
 		self.num_vert = 0
+		#self.g = Grafo()
 	#Necessario para iterar sobre o grafo
 	def __iter__(self):
 		return iter(self.vert_dict.values())
@@ -73,10 +75,10 @@ class Grafo():
 					fila.append(vizinho)		
 			noAtual.cor = 'Preto'
 		return resultado
-
 	def diametro(self):
-		#random vertice
-		listaR = self.bfs(self.vert_dict['c'])
+		#Pega o primeiro vertice do grafo.
+		listaR = self.bfs(list(self.vert_dict.values())[0])
+		#for item in self.vert_dict.values():
 		#ultimo da lista do BFS
 		mais_distante1 = self.vert_dict[listaR[-1]]
 		#aplica o BFS novamente no ultimo da lista do BFS anterior
@@ -85,30 +87,127 @@ class Grafo():
 		#diferenca entre as distancias e o diametro(provavelmente pode tirar o abs e deixar a dif de mais_distante2 e mais_distante1)
 		return abs(mais_distante1.dist - mais_distante2.dist)
 
+#Testes
+	
+@pytest.fixture
+def grafo_um():
+	'''Retorna um grafo inicializados para testes.'''
+	g = Grafo()
+	g.add_vert('a')
+	g.add_vert('b')
+	g.add_vert('c')
+	g.add_vert('d')
+	g.add_vert('e')
+	g.add_vert('f')
 
+	g.add_aresta('a', 'b')  
+	g.add_aresta('a', 'c')
+	g.add_aresta('a', 'f')
+	g.add_aresta('b', 'd')
+	g.add_aresta('b', 'a')
+	g.add_aresta('b', 'e')
+	g.add_aresta('c', 'a')
+	g.add_aresta('d', 'b')
+	g.add_aresta('e', 'b')
+	g.add_aresta('f', 'a')
+
+	return g
+
+@pytest.fixture
+def grafo_dois():
+	'''Retorna um grafo inicializados para testes.'''
+	g = Grafo()
+	g.add_vert('a')
+	g.add_vert('b')
+	g.add_vert('c')
+	g.add_vert('d')
+
+	g.add_aresta('a', 'b')  
+	g.add_aresta('a', 'c')
+	g.add_aresta('c', 'd')
+
+	return g
+
+@pytest.fixture
+def grafo_tres():
+	'''Retorna um grafo inicializados para testes.'''
+	g = Grafo()
+	g.add_vert('a')
+	g.add_vert('b')
+	g.add_vert('c')
+	g.add_vert('d')
+	g.add_vert('e')
+	g.add_vert('f')
+
+	g.add_aresta('a', 'b')  
+	g.add_aresta('a', 'c')
+	g.add_aresta('a', 'f')
+	g.add_aresta('b', 'c')
+	g.add_aresta('b', 'd')
+	g.add_aresta('c', 'd')
+	g.add_aresta('c', 'f')
+	g.add_aresta('d', 'e')
+	g.add_aresta('e', 'f')
+
+	return g
+
+def test_diametro(grafo_um,grafo_dois,grafo_tres):
+	
+
+	assert grafo_um.diametro() == 3
+	assert grafo_dois.diametro() == 3
+	assert grafo_tres.diametro() == 2
+
+def test_BFS(grafo_um,grafo_dois,grafo_tres):
+	#tipagem de retorno do BFS ->lista
+	assert isinstance(grafo_um.bfs(grafo_um.vert_dict['a']), list)
+	#valores de retorno. Para as variaveis de resultados, foram testados os BFS com a raiz no vertice 'a', sempre.
+	resultado_um_bfs = ['a', 'b', 'c', 'f', 'd', 'e']
+	resultado_dois_bfs = ['a', 'b', 'c', 'd']
+	resultado_tres_bfs = ['a', 'b', 'c', 'f', 'd', 'e']
+
+	assert all([x==y for x,y in zip(grafo_um.bfs(grafo_um.vert_dict['a']),resultado_um_bfs)])
+	assert all([x==y for x,y in zip(grafo_dois.bfs(grafo_dois.vert_dict['a']),resultado_dois_bfs)])
+	assert all([x==y for x,y in zip(grafo_tres.bfs(grafo_tres.vert_dict['a']),resultado_tres_bfs)])
+
+@pytest.mark.parametrize("raizBFS,resultadoBFS,diametro", [
+    ('a',['a', 'b', 'c', 'f', 'd', 'e'], 3),
+    ('b',['b', 'a', 'd', 'e', 'c', 'f'], 3),
+    ('c',['c', 'a', 'b', 'f', 'd', 'e'], 3),
+    ('d',['d', 'b', 'a', 'e', 'c', 'f'], 3),
+    ('e',['e', 'b', 'a', 'd', 'c', 'f'], 3),
+    ('f',['f', 'a', 'b', 'c', 'd', 'e'], 3),
+])
+
+def test_integracao1(grafo_um,raizBFS,resultadoBFS,diametro):
+
+	assert grafo_um.bfs(grafo_um.vert_dict[raizBFS]) == resultadoBFS
+	assert grafo_um.diametro() == diametro
+ 
 
 
 def main():
-    g = Grafo()
-    g.add_vert('a')
-    g.add_vert('b')
-    g.add_vert('c')
-    g.add_vert('d')
-    g.add_vert('e')
-    g.add_vert('f')
+	g = Grafo()
+	g.add_vert('a')
+	g.add_vert('b')
+	g.add_vert('c')
+	g.add_vert('d')
+	g.add_vert('e')
+	g.add_vert('f')
 
-    g.add_aresta('a', 'b', 7)  
-    g.add_aresta('a', 'c', 9)
-    g.add_aresta('a', 'f', 14)
-    g.add_aresta('b', 'c', 10)
-    g.add_aresta('b', 'd', 15)
-    g.add_aresta('c', 'd', 11)
-    g.add_aresta('c', 'f', 2)
-    g.add_aresta('d', 'e', 6)
-    g.add_aresta('e', 'f', 9)
+	g.add_aresta('a', 'b')  
+	g.add_aresta('a', 'c')
+	g.add_aresta('a', 'f')
+	g.add_aresta('b', 'd')
+	g.add_aresta('b', 'a')
+	g.add_aresta('b', 'e')
+	g.add_aresta('c', 'a')
+	g.add_aresta('d', 'b')
+	g.add_aresta('e', 'b')
+	g.add_aresta('f', 'a')
 
-    #print(g.bfs(g.vert_dict['a']))
-    print(g.diametro())
+	print(g.bfs(g.vert_dict['f']))
 
 if __name__ == '__main__':
-    main()
+	#unittest.main()
+	main()
