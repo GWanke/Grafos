@@ -1,7 +1,6 @@
-import numpy as np
+#import numpy as np
 from collections import deque as dq
 import pytest
-import unittest
 
 class Vertice():
 	def __init__(self, no, cor = None, pai = None, dist = None):
