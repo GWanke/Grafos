@@ -1,7 +1,6 @@
-import numpy as np
+#import numpy as np
 from collections import deque as dq
 import pytest
-import unittest
 
 class Vertice():
 	def __init__(self, no, cor = None, pai = None, dist = None):
@@ -32,19 +31,25 @@ class Grafo():
 		self.vert_dict = {}
 		self.num_vert = 0
 		#self.g = Grafo()
-	#Necessario para iterar sobre o grafo
+
+	#Metodo necessario para iterar sobre o grafo. E chamado quando fizermos um for em cima do grafo.
 	def __iter__(self):
 		return iter(self.vert_dict.values())
 
 	#adicionar um vertice ao grafo e retorna o mesmo.
+	#Entrada: Grafo e um vertice.
+	#Saida: Metodo sem retorno(adiciona o efeito colateral de acionar um vertice no dicionario do Grafo).
 	def add_vert(self, no):
 		self.num_vert += 1
 		novo_vert = Vertice(no)
 		self.vert_dict[no] = novo_vert
 		return novo_vert
 
-	#Checa se ambos os nos estao na estrutura. Caso contrario, adiciona. 
-	#Adiciona uma ligacao entre os nos, com o custo padrao de 1.
+	#Checa se ambos os vertices estao na estrutura. Caso contrario, adiciona. 
+	#Adiciona uma ligacao entre os vertices, com o custo padrao de 1.
+	
+	#Entrada: Grafo, dois vertices e um opcional de custo da aresta.
+	#Saida: Metodo sem retorno(adiciona o efeito colateral de acionar uma ligacao entre dois vertices do Grafo).
 	def add_aresta(self,de,para,custo = 1):
 		if de not in self.vert_dict:
 			self.add_vert(de)
@@ -64,7 +69,6 @@ class Grafo():
 		fila = dq([raiz])
 		raiz.dist = 0
 		raiz.cor = 'Cinza'
-		#somente para visualizacao
 		resultado = []
 		while fila:
 			noAtual = fila.popleft()
@@ -82,15 +86,15 @@ class Grafo():
 	# Entrada: self (grafo G)
 	# Saída: valor absoluto entre dois vértices mais distantes no grafo
 	def diametro(self):
-		#Pega o primeiro vertice do grafo.
+		#Aplica BFS no primeiro vertice(Indice baseado no dicionario interno do grafo).
 		listaR = self.bfs(list(self.vert_dict.values())[0])
-		#for item in self.vert_dict.values():
-		#ultimo da lista do BFS
+		#ultimo da lista do BFS(primeiro vertice)
 		mais_distante1 = self.vert_dict[listaR[-1]]
-		#aplica o BFS novamente no ultimo da lista do BFS anterior
+		#aplica o BFS novamente no ultimo da lista do BFS anterior.
 		listaR2 = self.bfs(mais_distante1)
+		#ultimo da lista do segundo BFS(segundo vertice)
 		mais_distante2 = self.vert_dict[listaR2[-1]]
-		#diferenca entre as distancias e o diametro(provavelmente pode tirar o abs e deixar a dif de mais_distante2 e mais_distante1)
+		#Calculo da diferenca entre a distancia dos dois vertices.
 		return abs(mais_distante1.dist - mais_distante2.dist)
 
 #Testes
@@ -157,13 +161,6 @@ def grafo_tres():
 
 	return g
 
-def test_diametro(grafo_um,grafo_dois,grafo_tres):
-	
-
-	assert grafo_um.diametro() == 3
-	assert grafo_dois.diametro() == 3
-	assert grafo_tres.diametro() == 2
-
 def test_BFS(grafo_um,grafo_dois,grafo_tres):
 	#tipagem de retorno do BFS ->lista
 	assert isinstance(grafo_um.bfs(grafo_um.vert_dict['a']), list)
@@ -176,21 +173,49 @@ def test_BFS(grafo_um,grafo_dois,grafo_tres):
 	assert all([x==y for x,y in zip(grafo_dois.bfs(grafo_dois.vert_dict['a']),resultado_dois_bfs)])
 	assert all([x==y for x,y in zip(grafo_tres.bfs(grafo_tres.vert_dict['a']),resultado_tres_bfs)])
 
-@pytest.mark.parametrize("raizBFS,resultadoBFS,diametro", [
-    ('a',['a', 'b', 'c', 'f', 'd', 'e'], 3),
-    ('b',['b', 'a', 'd', 'e', 'c', 'f'], 3),
-    ('c',['c', 'a', 'b', 'f', 'd', 'e'], 3),
-    ('d',['d', 'b', 'a', 'e', 'c', 'f'], 3),
-    ('e',['e', 'b', 'a', 'd', 'c', 'f'], 3),
-    ('f',['f', 'a', 'b', 'c', 'd', 'e'], 3),
+#Os testes a seguir equivalem ao teste anterior(BFS), porem executados 
+# em todos os valores possiveis de raiz para os grafos inicializados.
+
+#parametrize do primeiro grafo
+@pytest.mark.parametrize("raizBFS1,resultadoBFS1", [
+    ('a',['a', 'b', 'c', 'f', 'd', 'e']),
+    ('b',['b', 'a', 'd', 'e', 'c', 'f']),
+    ('c',['c', 'a', 'b', 'f', 'd', 'e']),
+    ('d',['d', 'b', 'a', 'e', 'c', 'f']),
+    ('e',['e', 'b', 'a', 'd', 'c', 'f']),
+    ('f',['f', 'a', 'b', 'c', 'd', 'e']),
 ])
 
-def test_integracao1(grafo_um,raizBFS,resultadoBFS,diametro):
+def test_grafoUmBFS(grafo_um,raizBFS1,resultadoBFS1):
+	assert grafo_um.bfs(grafo_um.vert_dict[raizBFS1]) == resultadoBFS1
 
-	assert grafo_um.bfs(grafo_um.vert_dict[raizBFS]) == resultadoBFS
-	assert grafo_um.diametro() == diametro
- 
+#parametrize do segundo grafo
+@pytest.mark.parametrize("raizBFS2,resultadoBFS2", [
+    ('a',['a', 'b', 'c', 'd']),
+    ('b',['b', 'a', 'c', 'd']),
+    ('c',['c', 'a', 'd', 'b']),
+    ('d',['d', 'c', 'a', 'b']),
+])
+def test_grafoDoisBFS(grafo_dois,raizBFS2,resultadoBFS2):
+	assert grafo_dois.bfs(grafo_dois.vert_dict[raizBFS2]) == resultadoBFS2
 
+#parametrize do terceiro grafo
+@pytest.mark.parametrize("raizBFS3,resultadoBFS3", [
+    ('a',['a', 'b', 'c', 'f', 'd', 'e']),
+    ('b',['b', 'a', 'c', 'd', 'f', 'e']),
+    ('c',['c', 'a', 'b', 'd', 'f', 'e']),
+    ('d',['d', 'b', 'c', 'e', 'a', 'f']),
+    ('e',['e', 'd', 'f', 'b', 'c', 'a']),
+    ('f',['f', 'a', 'c', 'e', 'b', 'd']),
+])
+def test_grafoTresBFS(grafo_tres,raizBFS3,resultadoBFS3):
+	assert grafo_tres.bfs(grafo_tres.vert_dict[raizBFS3]) == resultadoBFS3
+
+def test_diametro(grafo_um,grafo_dois,grafo_tres):
+	
+	assert grafo_um.diametro() == 3
+	assert grafo_dois.diametro() == 3
+	assert grafo_tres.diametro() == 2
 
 def main():
 	g = Grafo()
@@ -204,16 +229,15 @@ def main():
 	g.add_aresta('a', 'b')  
 	g.add_aresta('a', 'c')
 	g.add_aresta('a', 'f')
+	g.add_aresta('b', 'c')
 	g.add_aresta('b', 'd')
-	g.add_aresta('b', 'a')
-	g.add_aresta('b', 'e')
-	g.add_aresta('c', 'a')
-	g.add_aresta('d', 'b')
-	g.add_aresta('e', 'b')
-	g.add_aresta('f', 'a')
+	g.add_aresta('c', 'd')
+	g.add_aresta('c', 'f')
+	g.add_aresta('d', 'e')
+	g.add_aresta('e', 'f')
+
 
 	print(g.bfs(g.vert_dict['f']))
 
 if __name__ == '__main__':
-	#unittest.main()
 	main()
