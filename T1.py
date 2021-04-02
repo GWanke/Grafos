@@ -55,6 +55,8 @@ class Grafo():
 
    
 	#Realiza o BFS na classe grafo.
+	# Entrada: raiz -> Vértice
+	# Saída: resultado -> Lista de vértices (ordem de enfileiramento)
 	def bfs(self,raiz):
 		for vertice in self:
 			vertice.dist = -1
@@ -75,6 +77,10 @@ class Grafo():
 					fila.append(vizinho)		
 			noAtual.cor = 'Preto'
 		return resultado
+
+	# Objetivo: Retornar o diâmetro de um grafo de entrada
+	# Entrada: self (grafo G)
+	# Saída: valor absoluto entre dois vértices mais distantes no grafo
 	def diametro(self):
 		#Pega o primeiro vertice do grafo.
 		listaR = self.bfs(list(self.vert_dict.values())[0])
