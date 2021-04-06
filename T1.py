@@ -1,13 +1,15 @@
 #import numpy as np
 from collections import deque as dq
 import pytest
+import random
 
 class Vertice():
-	def __init__(self, no, cor = None, pai = None, dist = None):
+	def __init__(self, no, cor = None, pai = None, dist = None, visitado = None):
 		self.idx = no
 		self.cor = cor
 		self.pai = pai
 		self.dist = dist
+		self.visitado = visitado
 		self.listaAdj = {}
 
 	def show_lista_adj(self):
@@ -22,14 +24,15 @@ class Vertice():
 		return self.idx
 
 	def __str__(self):
-		#return str(self.idx) + ' adjacente' + str([x.idx for x in self.listaAdj])
-		return str(self.idx)
+		return str(self.idx) + ' adjacente' + str([x.idx for x in self.listaAdj])
+		#return str(self.idx)
 
 #Grafo implementado com a estrutura de dados dicionario do python.
 class Grafo():
 	def __init__(self):
 		self.vert_dict = {}
 		self.num_vert = 0
+		self.num_arestas = 0
 		#self.g = Grafo()
 
 	#Metodo necessario para iterar sobre o grafo. E chamado quando fizermos um for em cima do grafo.
@@ -51,6 +54,7 @@ class Grafo():
 	#Entrada: Grafo, dois vertices e um opcional de custo da aresta.
 	#Saida: Metodo sem retorno(adiciona o efeito colateral de acionar uma ligacao entre dois vertices do Grafo).
 	def add_aresta(self,de,para,custo = 1):
+		self.num_arestas += 1
 		if de not in self.vert_dict:
 			self.add_vert(de)
 		if para not in self.vert_dict:
@@ -97,7 +101,56 @@ class Grafo():
 		#Calculo da diferenca entre a distancia dos dois vertices.
 		return abs(mais_distante1.dist - mais_distante2.dist)
 
-#Testes
+
+	# Objetivo: Verificar se todos os vértices possuem acesso a todos os outros
+	# Entrada: O próprio grafo (G)
+	# Saída: True ou False
+	def conexo(self):
+		branco = False
+		for v in self:
+			if v.cor == 'Branco':
+				branco = True
+		if branco == True:
+			return False
+		else:
+			return True
+    
+    # Objetivo: Verifica se o grafo G é uma árvore
+    # Entrada: O próprio grafo (G)
+    # Saída: True ou False
+	def arvore(self):
+		if self.num_arestas != (self.num_vert - 1):
+			return False
+		s = list(self.vert_dict.values())[0]
+		self.bfs(s)
+		return conexo(self)
+
+
+
+# Objetivo: Realiza um passeio aleatório na lista de vértices
+# Entrada: n -> int (a quantidade de vértices, onde n > 0)
+# Saída: Árvore aleatória (G)
+def random_tree_random_walk(n):
+	# Criando grafo com n vértices
+	G = Grafo()
+	for i in range(n):
+		G.add_vert(str(i))
+	for vertex in G.vert_dict.values():
+		vertex.visitado = False
+	# Vertice qualquer de G
+	u =  list(G.vert_dict.values())[random.randint(0, n - 1)]
+	u.visitado = True
+	# Enquanto não for adicionado o número correto de arestas para a árvore geradora, seguindo a propriedade.
+	while G.num_arestas < (n - 1):
+		# Vertice aleatorio de G
+		v = list(G.vert_dict.values())[random.randint(0, n - 1)]		
+		if v.visitado == False:
+			G.add_aresta(u,v)
+			v.visitado = True
+		u = v
+	return G
+
+########################################################  Testes  ##############################################################
 	
 @pytest.fixture
 def grafo_um():
@@ -218,7 +271,8 @@ def test_diametro(grafo_um,grafo_dois,grafo_tres):
 	assert grafo_tres.diametro() == 2
 
 def main():
-	g = Grafo()
+	'''
+ 	g = Grafo()
 	g.add_vert('a')
 	g.add_vert('b')
 	g.add_vert('c')
@@ -238,6 +292,12 @@ def main():
 
 
 	print(g.bfs(g.vert_dict['f']))
-
+	'''
+ 
+	resp = random_tree_random_walk(6)
+	print('num de arestas: ' + str(resp.num_arestas))
+	for i in resp.vert_dict.values():
+		print(i.idx)
+ 
 if __name__ == '__main__':
 	main()
