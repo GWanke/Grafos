@@ -7,6 +7,21 @@ import sys
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from functools import reduce
+from functools import wraps
+import time
+
+def timeit(my_func):
+    @wraps(my_func)
+    def timed(*args, **kw):
+    
+        tstart = time.time()
+        output = my_func(*args, **kw)
+        tend = time.time()
+        
+        print('"{}" took {:.3f} ms to execute\n'.format(my_func.__name__, (tend - tstart) * 1000))
+        return output
+    return timed
+
 class Vertice():
 	def __init__(self, no, cor = None, pai = None, dist = None, visitado = None):
 		self.idx = no
@@ -301,7 +316,7 @@ def test_diametro(grafo_um,grafo_dois,grafo_tres):
 
 ############################ MAIN E FUNCOES AUXILIARES PARA A MAIN.##########################
 
-
+@timeit
 def execute(nVertic):
 	resp = (random_tree_random_walk(nVertic) for _ in itertools.repeat(None, 500))
 	return reduce(np.add, resp)/500
@@ -328,7 +343,7 @@ def fileRandomWalk():
 def fit(fun, x, y):
 	a, b = curve_fit(fun, x, y)
 	return round(a[0], 2), fun(x, a)
-
+@timeit
 def main():
 	fileRandomWalk()
 	alg = sys.argv[1]
