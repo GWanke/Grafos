@@ -3,8 +3,10 @@ from collections import deque as dq
 import pytest
 import itertools
 import random
+import sys
+import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
 from functools import reduce
-
 class Vertice():
 	def __init__(self, no, cor = None, pai = None, dist = None, visitado = None):
 		self.idx = no
@@ -74,6 +76,9 @@ class Grafo():
 		for vertex in self:
 			print(self.get_vert(vertex.idx))
 
+	@property
+	def vertices(self):
+		return self.vert_dict.values()
    
 	#Realiza o BFS na classe grafo.
 	# Entrada: raiz -> Vértice
@@ -103,7 +108,7 @@ class Grafo():
 	# Saída: valor absoluto entre dois vértices mais distantes no grafo
 	def diametro(self):
 		#Aplica BFS no primeiro vertice(Indice baseado no dicionario interno do grafo).
-		listaR = self.bfs(list(self.vert_dict.values())[0])
+		listaR = self.bfs(self.vert_dict.values().__iter__().__next__())
 		#ultimo da lista do BFS(primeiro vertice)
 		mais_distante1 = self.vert_dict[listaR[-1]]
 		#aplica o BFS novamente no ultimo da lista do BFS anterior.
@@ -117,29 +122,6 @@ class Grafo():
 		rnmdStr = str(random.randint(0, numMaxVert - 1))
 		vertRandom = self.vert_dict[rnmdStr]
 		return vertRandom
-
-	# Objetivo: Realiza um passeio aleatório na lista de vértices
-	# Entrada: n -> int (a quantidade de vértices, onde n > 0)
-	# Saída: Árvore aleatória (G)
-	def random_tree_random_walk(self, n):
-		# Criando grafo com n vértices
-		G = self.copy()
-		for i in range(n):
-			G.add_vert(str(i))
-		for vertex in G:
-			vertex.visitado = False	
-		# Vertice qualquer de G
-		u = G.getRandomVertex(n)
-		u.visitado = True
-		# Enquanto não for adicionado o número correto de arestas para a árvore geradora, seguindo a propriedade.
-		while G.num_arestas < (n - 1):
-		# Vertice aleatorio de G
-			v = G.getRandomVertex(n)		
-			if not v.visitado:
-				G.add_aresta(u.idx,v.idx)
-				v.visitado = True
-			u = v
-		return G.diametro()
 
 	# Objetivo: Verificar se todos os vértices possuem acesso a todos os outros
 	# Entrada: O próprio grafo (G)
@@ -163,11 +145,40 @@ class Grafo():
 		s = list(self.vert_dict.values())[0]
 		self.bfs(s)
 		return conexo(self)
- 
-# def repeatArvore(N, f, g,*args): 
-#     for i in range(N): 
-#          yield f(*args)
- 
+
+# Objetivo: Realiza um passeio aleatório na lista de vértices
+# Entrada: n -> int (a quantidade de vértices, onde n > 0)
+# Saída: Árvore aleatória (G)
+def random_tree_random_walk(n):
+	# Criando grafo com n vértices
+	G = Grafo()
+	for i in range(n):
+		G.add_vert(str(i))
+	#nao_visitados = vertices[1:]
+	#visitados: List[Vertice] = [vertices[0]]
+	# Vertice qualquer de G
+	u = G.getRandomVertex(n)
+	u.visitado = True
+	#Enquanto não for adicionado o número correto de arestas para a árvore geradora, seguindo a propriedade.
+	while G.num_arestas < (n - 1):
+	# Vertice aleatorio de G
+		v = G.getRandomVertex(n)		
+		if not v.visitado:
+			G.add_aresta(u.idx,v.idx)
+			v.visitado = True
+		u = v
+	# while len(nao_visitados) > 0:
+	# 	v = nao_visitados.pop()
+	# 	u = random.choice(visitados)
+
+	# 	v.add_vizinho(u, 1)
+	# 	u.add_vizinho(v, 1)
+	# 	G.num_arestas+=1
+
+	# 	visitados.append(v)
+	# #print(G.num_vert,G.num_arestas)
+	return G.diametro()
+
 ########################################################  Testes  ##############################################################
 	
 @pytest.fixture
@@ -288,38 +299,58 @@ def test_diametro(grafo_um,grafo_dois,grafo_tres):
 	assert grafo_dois.diametro() == 3
 	assert grafo_tres.diametro() == 2
 
-def diametro_average(values):
-   sum, n = 0, 0
-   for x in values:
-      sum += x
-      n += 1
-   return float(sum)/n
+############################ MAIN E FUNCOES AUXILIARES PARA A MAIN.##########################
 
+
+def execute(nVertic):
+	resp = (random_tree_random_walk(nVertic) for _ in itertools.repeat(None, 500))
+	return reduce(np.add, resp)/500
+
+def fileRandomWalk():
+	with open("randomwalk.txt", "w") as f:
+		r1 = execute(250)
+		f.write('250 ' + str(r1) + '\n')
+		r2 = execute(500)
+		f.write('500 ' + str(r2) + '\n')
+		r3 = execute(750)
+		f.write('750 ' + str(r3) + '\n')
+		r4 = execute(1000)
+		f.write('1000 ' + str(r4) + '\n')
+		r5 = execute(1250)
+		f.write('1250 ' + str(r5) + '\n')
+		r6 = execute(1500)
+		f.write('1500 ' + str(r6) + '\n')
+		r7 = execute(1750)
+		f.write('1750 ' + str(r7) + '\n')
+		r8 = execute(2000)
+		f.write('2000 ' + str(r8) + '\n')
+
+def fit(fun, x, y):
+	a, b = curve_fit(fun, x, y)
+	return round(a[0], 2), fun(x, a)
 
 def main():
-	g = Grafo()
-	resp = []
-	# g.add_vert('a')
-	# g.add_vert('b')
-	# g.add_vert('c')
-	# g.add_vert('d')
-	# g.add_vert('e')
-	# g.add_vert('f')
-
-	# g.add_aresta('a', 'b')  
-	# g.add_aresta('a', 'c')
-	# g.add_aresta('a', 'f')
-	# g.add_aresta('b', 'c')
-	# g.add_aresta('b', 'd')
-	# g.add_aresta('c', 'd')
-	# g.add_aresta('c', 'f')
-	# g.add_aresta('d', 'e')
-	# g.add_aresta('e', 'f')
-	#resp = []
-	for _ in itertools.repeat(None,500):
-		resp.append(g.random_tree_random_walk(1500))
-	media = reduce(np.add, resp)/500
-	print(media)
+	fileRandomWalk()
+	alg = sys.argv[1]
+	if alg == 'randomwalk':
+		fun = lambda x, a: a * np.power(x, 1/2)
+		p = r'$\times \sqrt{n}$'
+	elif alg == 'kruskal' or alg == 'prim':
+		fun = lambda x, a: a * np.power(x, 1/3)
+		p = r'$\times \sqrt[3]{n}$'
+	else:
+		print("Algoritmo inválido:", alg)
+	lines = sys.stdin.readlines()
+	data = np.array([list(map(float, line.split())) for line in lines])
+	n = data[:, 0]
+	data = data[:, 1]
+	a, fitted = fit(fun, n, data)
+	plt.plot(n, data, 'o', label=alg.capitalize())
+	plt.plot(n, fitted, label= str(a) + p, color='grey')
+	plt.xlabel('Número de vértices')
+	plt.ylabel('Diâmetro')
+	plt.legend()
+	plt.savefig(alg + '.pdf')
  
 if __name__ == '__main__':
 	main()
