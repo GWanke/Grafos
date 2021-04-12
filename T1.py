@@ -1,7 +1,9 @@
-#import numpy as np
+import numpy as np
 from collections import deque as dq
 import pytest
+import itertools
 import random
+from functools import reduce
 
 class Vertice():
 	def __init__(self, no, cor = None, pai = None, dist = None, visitado = None):
@@ -33,7 +35,9 @@ class Grafo():
 		self.vert_dict = {}
 		self.num_vert = 0
 		self.num_arestas = 0
-		#self.g = Grafo()
+
+	def copy(self):
+		return Grafo()
 
 	#Metodo necessario para iterar sobre o grafo. E chamado quando fizermos um for em cima do grafo.
 	def __iter__(self):
@@ -48,6 +52,10 @@ class Grafo():
 		self.vert_dict[no] = novo_vert
 		return novo_vert
 
+	def get_vert(self, n):
+		if n in self.vert_dict:
+			return self.vert_dict[n]
+
 	#Checa se ambos os vertices estao na estrutura. Caso contrario, adiciona. 
 	#Adiciona uma ligacao entre os vertices, com o custo padrao de 1.
 	
@@ -59,8 +67,12 @@ class Grafo():
 			self.add_vert(de)
 		if para not in self.vert_dict:
 			self.add_vert(para)
-		self.vert_dict[de].add_vizinho(self.vert_dict[para],custo)
-		self.vert_dict[para].add_vizinho(self.vert_dict[de],custo)
+		self.vert_dict[de].add_vizinho(self.vert_dict[para], custo)
+		self.vert_dict[para].add_vizinho(self.vert_dict[de], custo)
+
+	def showListaAdjGlobal(self):
+		for vertex in self:
+			print(self.get_vert(vertex.idx))
 
    
 	#Realiza o BFS na classe grafo.
@@ -101,6 +113,33 @@ class Grafo():
 		#Calculo da diferenca entre a distancia dos dois vertices.
 		return abs(mais_distante1.dist - mais_distante2.dist)
 
+	def getRandomVertex(self,numMaxVert):
+		rnmdStr = str(random.randint(0, numMaxVert - 1))
+		vertRandom = self.vert_dict[rnmdStr]
+		return vertRandom
+
+	# Objetivo: Realiza um passeio aleatório na lista de vértices
+	# Entrada: n -> int (a quantidade de vértices, onde n > 0)
+	# Saída: Árvore aleatória (G)
+	def random_tree_random_walk(self, n):
+		# Criando grafo com n vértices
+		G = self.copy()
+		for i in range(n):
+			G.add_vert(str(i))
+		for vertex in G:
+			vertex.visitado = False	
+		# Vertice qualquer de G
+		u = G.getRandomVertex(n)
+		u.visitado = True
+		# Enquanto não for adicionado o número correto de arestas para a árvore geradora, seguindo a propriedade.
+		while G.num_arestas < (n - 1):
+		# Vertice aleatorio de G
+			v = G.getRandomVertex(n)		
+			if not v.visitado:
+				G.add_aresta(u.idx,v.idx)
+				v.visitado = True
+			u = v
+		return G.diametro()
 
 	# Objetivo: Verificar se todos os vértices possuem acesso a todos os outros
 	# Entrada: O próprio grafo (G)
@@ -118,38 +157,17 @@ class Grafo():
     # Objetivo: Verifica se o grafo G é uma árvore
     # Entrada: O próprio grafo (G)
     # Saída: True ou False
-	def arvore(self):
+	def isArvore(self):
 		if self.num_arestas != (self.num_vert - 1):
 			return False
 		s = list(self.vert_dict.values())[0]
 		self.bfs(s)
 		return conexo(self)
-
-
-
-# Objetivo: Realiza um passeio aleatório na lista de vértices
-# Entrada: n -> int (a quantidade de vértices, onde n > 0)
-# Saída: Árvore aleatória (G)
-def random_tree_random_walk(n):
-	# Criando grafo com n vértices
-	G = Grafo()
-	for i in range(n):
-		G.add_vert(str(i))
-	for vertex in G.vert_dict.values():
-		vertex.visitado = False
-	# Vertice qualquer de G
-	u =  list(G.vert_dict.values())[random.randint(0, n - 1)]
-	u.visitado = True
-	# Enquanto não for adicionado o número correto de arestas para a árvore geradora, seguindo a propriedade.
-	while G.num_arestas < (n - 1):
-		# Vertice aleatorio de G
-		v = list(G.vert_dict.values())[random.randint(0, n - 1)]		
-		if v.visitado == False:
-			G.add_aresta(u,v)
-			v.visitado = True
-		u = v
-	return G
-
+ 
+# def repeatArvore(N, f, g,*args): 
+#     for i in range(N): 
+#          yield f(*args)
+ 
 ########################################################  Testes  ##############################################################
 	
 @pytest.fixture
@@ -270,34 +288,38 @@ def test_diametro(grafo_um,grafo_dois,grafo_tres):
 	assert grafo_dois.diametro() == 3
 	assert grafo_tres.diametro() == 2
 
+def diametro_average(values):
+   sum, n = 0, 0
+   for x in values:
+      sum += x
+      n += 1
+   return float(sum)/n
+
+
 def main():
-	'''
- 	g = Grafo()
-	g.add_vert('a')
-	g.add_vert('b')
-	g.add_vert('c')
-	g.add_vert('d')
-	g.add_vert('e')
-	g.add_vert('f')
+	g = Grafo()
+	resp = []
+	# g.add_vert('a')
+	# g.add_vert('b')
+	# g.add_vert('c')
+	# g.add_vert('d')
+	# g.add_vert('e')
+	# g.add_vert('f')
 
-	g.add_aresta('a', 'b')  
-	g.add_aresta('a', 'c')
-	g.add_aresta('a', 'f')
-	g.add_aresta('b', 'c')
-	g.add_aresta('b', 'd')
-	g.add_aresta('c', 'd')
-	g.add_aresta('c', 'f')
-	g.add_aresta('d', 'e')
-	g.add_aresta('e', 'f')
-
-
-	print(g.bfs(g.vert_dict['f']))
-	'''
- 
-	resp = random_tree_random_walk(6)
-	print('num de arestas: ' + str(resp.num_arestas))
-	for i in resp.vert_dict.values():
-		print(i.idx)
+	# g.add_aresta('a', 'b')  
+	# g.add_aresta('a', 'c')
+	# g.add_aresta('a', 'f')
+	# g.add_aresta('b', 'c')
+	# g.add_aresta('b', 'd')
+	# g.add_aresta('c', 'd')
+	# g.add_aresta('c', 'f')
+	# g.add_aresta('d', 'e')
+	# g.add_aresta('e', 'f')
+	#resp = []
+	for _ in itertools.repeat(None,500):
+		resp.append(g.random_tree_random_walk(1500))
+	media = reduce(np.add, resp)/500
+	print(media)
  
 if __name__ == '__main__':
 	main()
