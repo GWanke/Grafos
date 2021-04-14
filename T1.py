@@ -1,3 +1,9 @@
+#Trabalho destinado a segunda implementacao do trabalho pratico da disciplina de Grafos
+#da Universidade Estadual de Maringa, ano de 2021.
+
+#Autores:Gustavo Rodrigues Wanke - RA:91671
+#		 Fernando Silva Silverio - RA:98936
+
 import numpy as np
 from collections import deque as dq
 import pytest
@@ -10,6 +16,8 @@ from functools import reduce
 from functools import wraps
 import time
 
+
+#funcao utilizada como decorator para saber o tempo de execucao de um metodo.(Basta colocar @timeit em cima do mesmo).
 def timeit(my_func):
     @wraps(my_func)
     def timed(*args, **kw):
@@ -18,7 +26,7 @@ def timeit(my_func):
         output = my_func(*args, **kw)
         tend = time.time()
         
-        print('"{}" took {:.3f} ms to execute\n'.format(my_func.__name__, (tend - tstart) * 1000))
+        print('"{}" demorou {:.3f} ms para executar\n'.format(my_func.__name__, (tend - tstart) * 1000))
         return output
     return timed
 
@@ -52,9 +60,6 @@ class Grafo():
 		self.vert_dict = {}
 		self.num_vert = 0
 		self.num_arestas = 0
-
-	def copy(self):
-		return Grafo()
 
 	#Metodo necessario para iterar sobre o grafo. E chamado quando fizermos um for em cima do grafo.
 	def __iter__(self):
@@ -114,7 +119,10 @@ class Grafo():
 					vizinho.cor = 'Cinza'
 					vizinho.pai = noAtual
 					vizinho.dist = noAtual.dist +1
-					fila.append(vizinho)		
+					fila.append(vizinho)
+				#checagem usada pra detectar ciclos.
+				elif noAtual.pai != vizinho:
+					return False		
 			noAtual.cor = 'Preto'
 		return resultado
 
@@ -122,17 +130,23 @@ class Grafo():
 	# Entrada: self (grafo G)
 	# Saída: valor absoluto entre dois vértices mais distantes no grafo
 	def diametro(self):
+		primeiroVisitado = self.bfs(self.vert_dict.values().__iter__().__next__())
 		#Aplica BFS no primeiro vertice(Indice baseado no dicionario interno do grafo).
-		listaR = self.bfs(self.vert_dict.values().__iter__().__next__())
-		#ultimo da lista do BFS(primeiro vertice)
-		mais_distante1 = self.vert_dict[listaR[-1]]
-		#aplica o BFS novamente no ultimo da lista do BFS anterior.
-		listaR2 = self.bfs(mais_distante1)
-		#ultimo da lista do segundo BFS(segundo vertice)
-		mais_distante2 = self.vert_dict[listaR2[-1]]
-		#Calculo da diferenca entre a distancia dos dois vertices.
-		return abs(mais_distante1.dist - mais_distante2.dist)
+		if(primeiroVisitado):
+			#ultimo da lista do BFS(primeiro vertice)
+			mais_distante1 = self.vert_dict[primeiroVisitado[-1]]
+			#aplica o BFS novamente no ultimo da lista do BFS anterior.
+			listaR2 = self.bfs(mais_distante1)
+			#ultimo da lista do segundo BFS(segundo vertice)
+			mais_distante2 = self.vert_dict[listaR2[-1]]
+			#Calculo da diferenca entre a distancia dos dois vertices.
+			return abs(mais_distante1.dist - mais_distante2.dist)
+		else:
+			return None
 
+	# Objetivo: Pegar um vertice randomicamente do grafo.
+    # Entrada: O próprio grafo (G)
+    # Saída: Um vertice do grafo.
 	def getRandomVertex(self,numMaxVert):
 		rnmdStr = str(random.randint(0, numMaxVert - 1))
 		vertRandom = self.vert_dict[rnmdStr]
@@ -142,35 +156,38 @@ class Grafo():
 	# Entrada: O próprio grafo (G)
 	# Saída: True ou False
 	def conexo(self):
-		branco = False
-		for v in self:
-			if v.cor == 'Branco':
-				branco = True
-		if branco == True:
-			return False
-		else:
+		#Reduz as vertices para um set.
+		result = set(self.vert_dict.keys())
+		#Transforma o resultado do BFS em um Set
+		r = set(self.bfs(self.vert_dict.values().__iter__().__next__()))
+		#Comparacao dos dois Sets. Se todas as vertices estiverem no resultado do BFS, isso implica que 
+		#todos os vertices foram visitados. Logo, o grafo e conexo.
+		if r == result:
 			return True
-    
+		else:
+			return False
+
     # Objetivo: Verifica se o grafo G é uma árvore
     # Entrada: O próprio grafo (G)
     # Saída: True ou False
-	def isArvore(self):
+	def isTree(self):
 		if self.num_arestas != (self.num_vert - 1):
 			return False
-		s = list(self.vert_dict.values())[0]
-		self.bfs(s)
-		return conexo(self)
+		if self.conexo():
+			return True
+		return False
+		# s = list(self.vert_dict.values())[0]
+		# self.bfs(s)
+		# return conexo(self)
 
 # Objetivo: Realiza um passeio aleatório na lista de vértices
 # Entrada: n -> int (a quantidade de vértices, onde n > 0)
-# Saída: Árvore aleatória (G)
+# Saída: Árvore aleatória (G) e seu diametro.
 def random_tree_random_walk(n):
 	# Criando grafo com n vértices
 	G = Grafo()
 	for i in range(n):
 		G.add_vert(str(i))
-	#nao_visitados = vertices[1:]
-	#visitados: List[Vertice] = [vertices[0]]
 	# Vertice qualquer de G
 	u = G.getRandomVertex(n)
 	u.visitado = True
@@ -182,20 +199,32 @@ def random_tree_random_walk(n):
 			G.add_aresta(u.idx,v.idx)
 			v.visitado = True
 		u = v
-	# while len(nao_visitados) > 0:
-	# 	v = nao_visitados.pop()
-	# 	u = random.choice(visitados)
-
-	# 	v.add_vizinho(u, 1)
-	# 	u.add_vizinho(v, 1)
-	# 	G.num_arestas+=1
-
-	# 	visitados.append(v)
-	# #print(G.num_vert,G.num_arestas)
-	return G.diametro()
+	return G,G.diametro()
 
 ########################################################  Testes  ##############################################################
-	
+#Para as arvores nao foi testado explicitamente o diametro, pois sao arvores geradas randomicamentes.
+
+#Na teoria basta freezar a seed do random e daria pra atrelar valor pros testes.
+
+#Entretanto, sabemos que o valor do diametro esta certo, pois esta sendo utilizado na
+#funcao auxiliar execute(abordada mais pra frente). 
+#-----ARVORES-----
+@pytest.fixture
+def arvore_um():
+	#Fixture de uma arvore aleatória com 6 vertices.(Caminho gerado randomicamente.)
+	return random_tree_random_walk(6)
+
+@pytest.fixture
+def arvore_dois():
+	#Fixture de uma arvore aleatória com 18 vertices.(Caminho gerado randomicamente.)
+	return random_tree_random_walk(18)
+
+@pytest.fixture
+def arvore_tres():
+	#Fixture de uma arvore aleatória com 36 vertices.(Caminho gerado randomicamente.)
+	return random_tree_random_walk(36)
+
+#-----GRAFOS-----	
 @pytest.fixture
 def grafo_um():
 	'''Retorna um grafo inicializados para testes.'''
@@ -237,7 +266,7 @@ def grafo_dois():
 
 @pytest.fixture
 def grafo_tres():
-	'''Retorna um grafo inicializados para testes.'''
+	'''Retorna um grafo inicializados para testes. - Grafo contem ciclos. Portanto, o BFS Ira retornar False.'''
 	g = Grafo()
 	g.add_vert('a')
 	g.add_vert('b')
@@ -264,14 +293,14 @@ def test_BFS(grafo_um,grafo_dois,grafo_tres):
 	#valores de retorno. Para as variaveis de resultados, foram testados os BFS com a raiz no vertice 'a', sempre.
 	resultado_um_bfs = ['a', 'b', 'c', 'f', 'd', 'e']
 	resultado_dois_bfs = ['a', 'b', 'c', 'd']
-	resultado_tres_bfs = ['a', 'b', 'c', 'f', 'd', 'e']
+	resultado_tres_bfs = False
 
 	assert all([x==y for x,y in zip(grafo_um.bfs(grafo_um.vert_dict['a']),resultado_um_bfs)])
 	assert all([x==y for x,y in zip(grafo_dois.bfs(grafo_dois.vert_dict['a']),resultado_dois_bfs)])
-	assert all([x==y for x,y in zip(grafo_tres.bfs(grafo_tres.vert_dict['a']),resultado_tres_bfs)])
+	assert grafo_tres.bfs(grafo_tres.vert_dict['a']) == resultado_tres_bfs
 
 #Os testes a seguir equivalem ao teste anterior(BFS), porem executados 
-# em todos os valores possiveis de raiz para os grafos inicializados.
+#em todos os valores possiveis de raiz para os grafos inicializados.
 
 #parametrize do primeiro grafo
 @pytest.mark.parametrize("raizBFS1,resultadoBFS1", [
@@ -298,12 +327,12 @@ def test_grafoDoisBFS(grafo_dois,raizBFS2,resultadoBFS2):
 
 #parametrize do terceiro grafo
 @pytest.mark.parametrize("raizBFS3,resultadoBFS3", [
-    ('a',['a', 'b', 'c', 'f', 'd', 'e']),
-    ('b',['b', 'a', 'c', 'd', 'f', 'e']),
-    ('c',['c', 'a', 'b', 'd', 'f', 'e']),
-    ('d',['d', 'b', 'c', 'e', 'a', 'f']),
-    ('e',['e', 'd', 'f', 'b', 'c', 'a']),
-    ('f',['f', 'a', 'c', 'e', 'b', 'd']),
+    ('a',False),
+    ('b',False),
+    ('c',False),
+    ('d',False),
+    ('e',False),
+    ('f',False),
 ])
 def test_grafoTresBFS(grafo_tres,raizBFS3,resultadoBFS3):
 	assert grafo_tres.bfs(grafo_tres.vert_dict[raizBFS3]) == resultadoBFS3
@@ -312,15 +341,38 @@ def test_diametro(grafo_um,grafo_dois,grafo_tres):
 	
 	assert grafo_um.diametro() == 3
 	assert grafo_dois.diametro() == 3
-	assert grafo_tres.diametro() == 2
+	assert grafo_tres.diametro() == None
+
+@pytest.mark.parametrize("Conexo,Arvore", [
+    (True,True),
+])
+def test_geral_arvore(arvore_um,arvore_dois,arvore_tres,Conexo,Arvore):
+	assert arvore_um[0].conexo() == Conexo
+	assert arvore_dois[0].conexo() == Conexo
+	assert arvore_tres[0].conexo() == Conexo
+
+	assert arvore_um[0].isTree() == Arvore
+	assert arvore_dois[0].isTree() == Arvore
+	assert arvore_tres[0].isTree() == Arvore
 
 ############################ MAIN E FUNCOES AUXILIARES PARA A MAIN.##########################
 
-@timeit
+#Funcao destinada a execucao de 500 vezes para um metodo de gerar arvores aleatorias. O metodo nos da a certeza de
+#ser uma arvore o resultado do passeio aleatorio, e utiliza diametro deste passeio para calcular a media dos passeios,
+#apos 500 execucoes.
+#Entrada:numero Vertices para o passeio aleatorio
+#Saida: Int referente a media de diametro de 500 execucoes no passeio.
 def execute(nVertic):
-	resp = (random_tree_random_walk(nVertic) for _ in itertools.repeat(None, 500))
-	return reduce(np.add, resp)/500
-
+	somador = 0
+	arvores = 0
+	for _ in itertools.repeat(None,500):
+		grafo,diametro = random_tree_random_walk(nVertic)
+		if grafo.isTree():
+			somador += diametro
+			arvores += 1
+	if arvores == 500:
+		return somador/500
+@timeit
 def fileRandomWalk():
 	with open("randomwalk.txt", "w") as f:
 		r1 = execute(250)
@@ -343,6 +395,7 @@ def fileRandomWalk():
 def fit(fun, x, y):
 	a, b = curve_fit(fun, x, y)
 	return round(a[0], 2), fun(x, a)
+
 @timeit
 def main():
 	fileRandomWalk()
@@ -366,6 +419,7 @@ def main():
 	plt.ylabel('Diâmetro')
 	plt.legend()
 	plt.savefig(alg + '.pdf')
- 
+
+
 if __name__ == '__main__':
 	main()
