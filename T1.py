@@ -180,29 +180,8 @@ class Grafo():
 		# self.bfs(s)
 		# return conexo(self)
 
-# Objetivo: Realiza um passeio aleatório na lista de vértices
-# Entrada: n -> int (a quantidade de vértices, onde n > 0)
-# Saída: Árvore aleatória (G) e seu diametro.
-def random_tree_random_walk(n):
-	# Criando grafo com n vértices
-	G = Grafo()
-	for i in range(n):
-		G.add_vert(str(i))
-	# Vertice qualquer de G
-	u = G.getRandomVertex(n)
-	u.visitado = True
-	#Enquanto não for adicionado o número correto de arestas para a árvore geradora, seguindo a propriedade.
-	while G.num_arestas < (n - 1):
-	# Vertice aleatorio de G
-		v = G.getRandomVertex(n)		
-		if not v.visitado:
-			G.add_aresta(u.idx,v.idx)
-			v.visitado = True
-		u = v
-	return G,G.diametro()
 
-
-
+####Funcoes auxiliares PRIM e KRUSKAL####
 
 def find_set(x):
 	if x != x.pai:
@@ -225,6 +204,44 @@ def make_set(x):
 	x.pai = x
 	x.rank = 0
 
+def grafo_completo_com_peso(n):
+	G = Grafo()
+	for i in range(n):
+		G.add_vert(str(i))
+	for i in range(0,n):
+		for j in range(i+1,n):
+			G.add_aresta(G.vert_dict[str(i)].idx,G.vert_dict[str(j)].idx,round(random.uniform(0,1),3))
+	#a = n*((n-1)/2) == G.num_arestas ->>>>Teste
+	#print(round(random.uniform(0,1),3))
+	return G
+
+
+####Passeios aleatorios####
+
+# Objetivo: Realiza um passeio aleatório na lista de vértices
+# Entrada: n -> int (a quantidade de vértices, onde n > 0)
+# Saída: Árvore aleatória (G) e seu diametro.
+def random_tree_random_walk(n):
+	# Criando grafo com n vértices
+	G = Grafo()
+	for i in range(n):
+		G.add_vert(str(i))
+	# Vertice qualquer de G
+	u = G.getRandomVertex(n)
+	u.visitado = True
+	#Enquanto não for adicionado o número correto de arestas para a árvore geradora, seguindo a propriedade.
+	while G.num_arestas < (n - 1):
+	# Vertice aleatorio de G
+		v = G.getRandomVertex(n)		
+		if not v.visitado:
+			G.add_aresta(u.idx,v.idx)
+			v.visitado = True
+		u = v
+	return G,G.diametro()
+
+
+def random_tree_kruskal(n):
+	G = grafo_completo_com_peso(n)
 
 
 
@@ -426,27 +443,28 @@ def fit(fun, x, y):
 
 @timeit
 def main():
-	fileRandomWalk()
-	alg = sys.argv[1]
-	if alg == 'randomwalk':
-		fun = lambda x, a: a * np.power(x, 1/2)
-		p = r'$\times \sqrt{n}$'
-	elif alg == 'kruskal' or alg == 'prim':
-		fun = lambda x, a: a * np.power(x, 1/3)
-		p = r'$\times \sqrt[3]{n}$'
-	else:
-		print("Algoritmo inválido:", alg)
-	lines = sys.stdin.readlines()
-	data = np.array([list(map(float, line.split())) for line in lines])
-	n = data[:, 0]
-	data = data[:, 1]
-	a, fitted = fit(fun, n, data)
-	plt.plot(n, data, 'o', label=alg.capitalize())
-	plt.plot(n, fitted, label= str(a) + p, color='grey')
-	plt.xlabel('Número de vértices')
-	plt.ylabel('Diâmetro')
-	plt.legend()
-	plt.savefig(alg + '.pdf')
+	random_tree_kruskal(7)
+	# fileRandomWalk()
+	# alg = sys.argv[1]
+	# if alg == 'randomwalk':
+	# 	fun = lambda x, a: a * np.power(x, 1/2)
+	# 	p = r'$\times \sqrt{n}$'
+	# elif alg == 'kruskal' or alg == 'prim':
+	# 	fun = lambda x, a: a * np.power(x, 1/3)
+	# 	p = r'$\times \sqrt[3]{n}$'
+	# else:
+	# 	print("Algoritmo inválido:", alg)
+	# lines = sys.stdin.readlines()
+	# data = np.array([list(map(float, line.split())) for line in lines])
+	# n = data[:, 0]
+	# data = data[:, 1]
+	# a, fitted = fit(fun, n, data)
+	# plt.plot(n, data, 'o', label=alg.capitalize())
+	# plt.plot(n, fitted, label= str(a) + p, color='grey')
+	# plt.xlabel('Número de vértices')
+	# plt.ylabel('Diâmetro')
+	# plt.legend()
+	# plt.savefig(alg + '.pdf')
 
 
 if __name__ == '__main__':
