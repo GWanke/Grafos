@@ -201,6 +201,34 @@ def random_tree_random_walk(n):
 		u = v
 	return G,G.diametro()
 
+
+
+
+def find_set(x):
+	if x != x.pai:
+		x.pai = find_set(x.pai)
+	return x.pai
+
+def link(x,y):
+	if x.rank > y.rank:
+		y.pai = x
+	else:
+		x.pai = y
+		if x.rank == y.rank:
+			y.rank = y.rank + 1
+
+
+def union(x,y):
+	link(find_set(x),find_set(y))
+
+def make_set(x):
+	x.pai = x
+	x.rank = 0
+
+
+
+
+
 ########################################################  Testes  ##############################################################
 #Para as arvores nao foi testado explicitamente o diametro, pois sao arvores geradas randomicamentes.
 
