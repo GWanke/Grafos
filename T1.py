@@ -15,6 +15,7 @@ from scipy.optimize import curve_fit
 from functools import reduce
 from functools import wraps
 import time
+import operator
 
 
 #funcao utilizada como decorator para saber o tempo de execucao de um metodo.(Basta colocar @timeit em cima do mesmo).
@@ -45,10 +46,14 @@ class Vertice():
 	def add_vizinho(self,other,peso):
 		self.listaAdj[other] = peso
 
-	# def __iter__(self):
-	# 	return iter(self.listaAdj.values())
 	def get_idx(self):
 		return self.idx
+
+	def get_conexoes(self):
+		return self.listaAdj.keys()
+
+	def get_peso(self, other):
+		return self.listaAdj[other]
 
 	def __str__(self):
 		return str(self.idx) + ' adjacente' + str([x.idx for x in self.listaAdj])
@@ -91,6 +96,9 @@ class Grafo():
 			self.add_vert(para)
 		self.vert_dict[de].add_vizinho(self.vert_dict[para], custo)
 		self.vert_dict[para].add_vizinho(self.vert_dict[de], custo)
+
+	def show_aresta(self):
+		return self.vert_dict.keys()
 
 	def showListaAdjGlobal(self):
 		for vertex in self:
@@ -211,8 +219,7 @@ def grafo_completo_com_peso(n):
 	for i in range(0,n):
 		for j in range(i+1,n):
 			G.add_aresta(G.vert_dict[str(i)].idx,G.vert_dict[str(j)].idx,round(random.uniform(0,1),3))
-	#a = n*((n-1)/2) == G.num_arestas ->>>>Teste
-	#print(round(random.uniform(0,1),3))
+	#a = n*((n-1)/2) == G.num_arestas ->>>>Teste	
 	return G
 
 
@@ -242,6 +249,32 @@ def random_tree_random_walk(n):
 
 def random_tree_kruskal(n):
 	G = grafo_completo_com_peso(n)
+	MST_Kruskal(G)
+
+
+def sort_crescente(grafo):
+	arestas = []
+	for verticeDE in grafo:
+		for verticePARA in verticeDE.get_conexoes():
+			#primeira aresta
+			verticeAID = verticeDE.get_idx()
+			#segunda aresta
+			verticeBID = verticePARA.get_idx()
+			#peso da aresta
+			peso = verticeDE.get_peso(verticePARA)
+			#como vai ser adicionado na lista de arestas. E possivel acessar depois por ver.idx.
+			arestaFormato = verticeAID,verticeBID,peso
+			arestas.append(arestaFormato)
+	#sort em ordem crescente o atributo de peso.
+	arestasSorted = sorted(arestas, key=operator.itemgetter(2))
+	return arestasSorted
+			
+
+def MST_Kruskal(grafo):
+	arestas = sort_crescente(grafo)
+	print(arestas)
+
+
 
 
 
@@ -465,6 +498,36 @@ def main():
 	# plt.ylabel('Diâmetro')
 	# plt.legend()
 	# plt.savefig(alg + '.pdf')
+
+	g = Grafo()
+	g.add_vert('1')
+	g.add_vert('2')
+	g.add_vert('3')
+	g.add_vert('4')
+	g.add_vert('5')
+	g.add_vert('6')
+	g.add_vert('7')
+	g.add_vert('8')
+	g.add_vert('9')
+	g.add_vert('10')
+	g.add_vert('11')
+	g.add_vert('12')
+
+	g.add_aresta('1', '2',0.1)  
+	g.add_aresta('1', '3',0.2)
+	g.add_aresta('1', '4',0.1)
+	g.add_aresta('2', '5',0.4)
+	g.add_aresta('2', '6',0.5)
+	g.add_aresta('4', '7',0.1)
+	g.add_aresta('4', '8',0.11)
+	g.add_aresta('5', '9',0.12)
+	#aresta de ciclo
+	g.add_aresta('5', '10')
+	g.add_aresta('6', '10')
+	g.add_aresta('7', '11')
+	g.add_aresta('7', '12')
+
+
 
 
 if __name__ == '__main__':
