@@ -275,15 +275,10 @@ def sort_crescente(grafo):
 			#peso da aresta
 			peso = verticeDE.get_peso(verticePARA)
 			#como vai ser adicionado na lista de arestas. E possivel acessar depois por ver.idx.
-			arestas[verticeAID,verticeBID] = peso
+			arestas[peso] = verticeAID,verticeBID
 	#sort em ordem crescente o atributo de peso.
-	arestasSorted = sorted(arestas.items(), key=lambda x: x[1])
-	#valores duplicados
-	DictSorted = dict(arestasSorted)
-	#tirando duplicacao
-	d2 = {v: k for k, v in DictSorted.items()} 
-	DictSorted = {v: k for k, v in d2.items()} 
-	print(len(DictSorted),50*((49)/2))
+	arestasSorted = sorted(arestas.items(), key=operator.itemgetter(0))
+	DictSorted = {k: v for k, v in arestasSorted}
 	return DictSorted
 			
 #@timeit
@@ -293,9 +288,9 @@ def MST_Kruskal(grafo):
 		make_set(vertice)
 	arestas = sort_crescente(grafo)
 	for aresta in arestas.items():
-		v1 = aresta[0][0]
-		v2 = aresta[0][1]
-		peso = aresta[1]
+		v1 = aresta[1][0]
+		v2 = aresta[1][1]
+		peso = aresta[0]
 		if find_set(grafo.vert_dict[v1]) != find_set(grafo.vert_dict[v2]):
 			arestaAdicionada = v1,v2,peso
 			A.append(arestaAdicionada)
