@@ -249,11 +249,12 @@ def random_tree_random_walk(n):
 
 def random_tree_kruskal(n):
 	G = grafo_completo_com_peso(n)
-	MST_Kruskal(G)
+	teste = MST_Kruskal(G)
+	print(teste)
 
 
 def sort_crescente(grafo):
-	arestas = []
+	arestas = {}
 	for verticeDE in grafo:
 		for verticePARA in verticeDE.get_conexoes():
 			#primeira aresta
@@ -263,16 +264,32 @@ def sort_crescente(grafo):
 			#peso da aresta
 			peso = verticeDE.get_peso(verticePARA)
 			#como vai ser adicionado na lista de arestas. E possivel acessar depois por ver.idx.
-			arestaFormato = verticeAID,verticeBID,peso
-			arestas.append(arestaFormato)
+			arestas[verticeAID,verticeBID] = peso
 	#sort em ordem crescente o atributo de peso.
-	arestasSorted = sorted(arestas, key=operator.itemgetter(2))
-	return arestasSorted
+	arestasSorted = sorted(arestas.items(), key=operator.itemgetter(1))
+	#valores duplicados
+	DictSorted = dict(arestasSorted)
+	#tirando duplicacao
+	temp = {val : key for key, val in DictSorted.items()}
+	edgesAfterSort = {val : key for key, val in temp.items()}
+	return edgesAfterSort
 			
 
 def MST_Kruskal(grafo):
+	A = []
+	for vertice in grafo:
+		make_set(vertice)
 	arestas = sort_crescente(grafo)
-	print(arestas)
+	for aresta in list(arestas.keys()):
+		v1 = aresta[0]
+		v2 = aresta[1]
+		if find_set(grafo.vert_dict[v1]) != find_set(grafo.vert_dict[v2]):
+			A.append(aresta)
+			union(grafo.vert_dict[v1],grafo.vert_dict[v2])
+	return A
+
+
+
 
 
 
@@ -499,33 +516,33 @@ def main():
 	# plt.legend()
 	# plt.savefig(alg + '.pdf')
 
-	g = Grafo()
-	g.add_vert('1')
-	g.add_vert('2')
-	g.add_vert('3')
-	g.add_vert('4')
-	g.add_vert('5')
-	g.add_vert('6')
-	g.add_vert('7')
-	g.add_vert('8')
-	g.add_vert('9')
-	g.add_vert('10')
-	g.add_vert('11')
-	g.add_vert('12')
+	# g = Grafo()
+	# g.add_vert('1')
+	# g.add_vert('2')
+	# g.add_vert('3')
+	# g.add_vert('4')
+	# g.add_vert('5')
+	# g.add_vert('6')
+	# g.add_vert('7')
+	# g.add_vert('8')
+	# g.add_vert('9')
+	# g.add_vert('10')
+	# g.add_vert('11')
+	# g.add_vert('12')
 
-	g.add_aresta('1', '2',0.1)  
-	g.add_aresta('1', '3',0.2)
-	g.add_aresta('1', '4',0.1)
-	g.add_aresta('2', '5',0.4)
-	g.add_aresta('2', '6',0.5)
-	g.add_aresta('4', '7',0.1)
-	g.add_aresta('4', '8',0.11)
-	g.add_aresta('5', '9',0.12)
-	#aresta de ciclo
-	g.add_aresta('5', '10')
-	g.add_aresta('6', '10')
-	g.add_aresta('7', '11')
-	g.add_aresta('7', '12')
+	# g.add_aresta('1', '2',0.1)  
+	# g.add_aresta('1', '3',0.2)
+	# g.add_aresta('1', '4',0.1)
+	# g.add_aresta('2', '5',0.4)
+	# g.add_aresta('2', '6',0.5)
+	# g.add_aresta('4', '7',0.1)
+	# g.add_aresta('4', '8',0.11)
+	# g.add_aresta('5', '9',0.12)
+	# #aresta de ciclo
+	# g.add_aresta('5', '10')
+	# g.add_aresta('6', '10')
+	# g.add_aresta('7', '11')
+	# g.add_aresta('7', '12')
 
 
 
