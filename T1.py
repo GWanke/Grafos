@@ -202,22 +202,22 @@ def link(x,y):
 		if x.rank == y.rank:
 			y.rank = y.rank + 1
 
-
 def union(x,y):
 	link(find_set(x),find_set(y))
-
 def make_set(x):
 	x.pai = x
 	x.rank = 0
 
+
+@timeit
 def grafo_completo_com_peso(n):
 	G = Grafo()
 	for i in range(n):
 		G.add_vert(str(i))
 	for i in range(0,n):
 		for j in range(i+1,n):
-			G.add_aresta(G.vert_dict[str(i)].idx,G.vert_dict[str(j)].idx,round(random.uniform(0,1),3))
-	#a = n*((n-1)/2) == G.num_arestas ->>>>Teste	
+			G.add_aresta(G.vert_dict[str(i)].idx,G.vert_dict[str(j)].idx,random.uniform(0,1))
+	#print(n*((n-1)/2) == G.num_arestas) #->>>>Teste	
 	return G
 
 
@@ -244,10 +244,10 @@ def random_tree_random_walk(n):
 		u = v
 	return G,G.diametro()
 
-
+#@timeit
 def random_tree_kruskal(n):
-	G = grafo_completo_com_peso(n)
 	GFinal = Grafo()
+	G = grafo_completo_com_peso(n)
 	arestasFinais = MST_Kruskal(G)
 	for aresta in arestasFinais:
 		v1 = aresta[0]
@@ -258,12 +258,12 @@ def random_tree_kruskal(n):
 		if v2 not in GFinal.vertices:
 			GFinal.add_vert(v2)
 		GFinal.add_aresta(v1,v2,peso)
-		#for vertice in GFinal:
-	return GFinal
+	#print(GFinal.num_vert,GFinal.num_arestas)
+	return GFinal,GFinal.diametro()
 
 
 
-
+@timeit
 def sort_crescente(grafo):
 	arestas = {}
 	for verticeDE in grafo:
@@ -277,15 +277,16 @@ def sort_crescente(grafo):
 			#como vai ser adicionado na lista de arestas. E possivel acessar depois por ver.idx.
 			arestas[verticeAID,verticeBID] = peso
 	#sort em ordem crescente o atributo de peso.
-	arestasSorted = sorted(arestas.items(), key=operator.itemgetter(1))
+	arestasSorted = sorted(arestas.items(), key=lambda x: x[1])
 	#valores duplicados
 	DictSorted = dict(arestasSorted)
 	#tirando duplicacao
-	temp = {val : key for key, val in DictSorted.items()}
-	edgesAfterSort = {val : key for key, val in temp.items()}
-	return edgesAfterSort
+	d2 = {v: k for k, v in DictSorted.items()} 
+	DictSorted = {v: k for k, v in d2.items()} 
+	print(len(DictSorted),50*((49)/2))
+	return DictSorted
 			
-
+#@timeit
 def MST_Kruskal(grafo):
 	A = []
 	for vertice in grafo:
@@ -300,12 +301,6 @@ def MST_Kruskal(grafo):
 			A.append(arestaAdicionada)
 			union(grafo.vert_dict[v1],grafo.vert_dict[v2])
 	return A
-
-
-
-
-
-
 
 
 
@@ -473,14 +468,14 @@ def test_geral_arvore(arvore_um,arvore_dois,arvore_tres,Conexo,Arvore):
 def execute(nVertic):
 	somador = 0
 	arvores = 0
-	for _ in itertools.repeat(None,500):
-		grafo,diametro = random_tree_random_walk(nVertic)
+	for _ in itertools.repeat(None,5):
+		grafo,diametro = random_tree_kruskal(nVertic)
 		if grafo.isTree():
 			somador += diametro
 			arvores += 1
-	if arvores == 500:
-		return somador/500
-@timeit
+	if arvores == 5:
+		return somador/5
+#@timeit
 def fileRandomWalk():
 	with open("randomwalk.txt", "w") as f:
 		r1 = execute(250)
@@ -504,11 +499,11 @@ def fit(fun, x, y):
 	a, b = curve_fit(fun, x, y)
 	return round(a[0], 2), fun(x, a)
 
-@timeit
+#@timeit
 def main():
-	g1 = random_tree_kruskal(250)
-	g2,d = random_tree_random_walk(250)
-	print(g1.diametro(),d)
+	g1,d = random_tree_kruskal(2000)
+	#g2,d = random_tree_random_walk(250)
+	print(d)
 	# fileRandomWalk()
 	# alg = sys.argv[1]
 	# if alg == 'randomwalk':
