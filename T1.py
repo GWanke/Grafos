@@ -219,8 +219,7 @@ def grafo_completo_com_peso(n):
 	G=Grafo()
 	for i in range(0,n):
 		for j in range(i+1,n):
-			G.add_aresta(str(i),str(j),random.uniform(0,1))
-	#print(n*((n-1)/2) == G.num_arestas) #->>>>Teste	
+			G.add_aresta(str(i),str(j),random.uniform(0,1))	
 	return G
 
 ####Passeios aleatorios####
@@ -261,6 +260,7 @@ def MST_Kruskal(grafo):
 	A = []
 	for vertice in grafo:
 		make_set(vertice)
+	#sort por peso das arestas
 	grafo.aresta_list.sort(key = operator.itemgetter(2))
 	for aresta in grafo.aresta_list:
 		v1 = aresta[0]
@@ -283,19 +283,39 @@ def MST_Kruskal(grafo):
 #funcao auxiliar execute(abordada mais pra frente). 
 #-----ARVORES-----
 @pytest.fixture
-def arvore_um():
+def arvore_um_random():
 	#Fixture de uma arvore aleatória com 6 vertices.(Caminho gerado randomicamente.)
 	return random_tree_random_walk(6)
 
 @pytest.fixture
-def arvore_dois():
+def arvore_dois_random():
 	#Fixture de uma arvore aleatória com 18 vertices.(Caminho gerado randomicamente.)
 	return random_tree_random_walk(18)
 
 @pytest.fixture
-def arvore_tres():
+def arvore_tres_random():
 	#Fixture de uma arvore aleatória com 36 vertices.(Caminho gerado randomicamente.)
 	return random_tree_random_walk(36)
+
+@pytest.fixture
+def arvore_um_kruskal():
+	'''Fixture de uma arvore aleatoria com 6 vertices, gerada pelo MST_Kruskal'''
+	random.seed(20)
+	return random_tree_kruskal(6)
+
+@pytest.fixture
+def arvore_dois_kruskal():
+	'''Fixture de uma arvore aleatoria com 18 vertices, gerada pelo MST_Kruskal'''
+	random.seed(20)
+	return random_tree_kruskal(18)
+
+@pytest.fixture
+def arvore_tres_kruskal():
+	'''Fixture de uma arvore aleatoria com 54 vertices, gerada pelo MST_Kruskal'''
+	random.seed(20)
+	return random_tree_kruskal(54)
+
+	 
 
 #-----GRAFOS-----	
 @pytest.fixture
@@ -360,10 +380,28 @@ def grafo_tres():
 
 	return g
 
+@pytest.fixture
+def grafo_completo_um():
+	random.seed(20)
+	'''Fixture de um grafo completo com 6 vertices.'''
+	return grafo_completo_com_peso(6)
+
+@pytest.fixture
+def grafo_completo_dois():
+	random.seed(20)
+	'''Fixture de um grafo completo com 20 vertices.'''
+	return grafo_completo_com_peso(10)
+
+@pytest.fixture
+def grafo_completo_tres():
+	random.seed(20)
+	'''Fixture de um grafo completo com 40 vertices.'''
+	return grafo_completo_com_peso(15)
+
 def test_BFS(grafo_um,grafo_dois,grafo_tres):
-	#tipagem de retorno do BFS ->lista
+	'''tipagem de retorno do BFS ->lista'''
 	assert isinstance(grafo_um.bfs(grafo_um.vert_dict['a']), list)
-	#valores de retorno. Para as variaveis de resultados, foram testados os BFS com a raiz no vertice 'a', sempre.
+	'''valores de retorno. Para as variaveis de resultados, foram testados os BFS com a raiz no vertice 'a', sempre.'''
 	resultado_um_bfs = ['a', 'b', 'c', 'f', 'd', 'e']
 	resultado_dois_bfs = ['a', 'b', 'c', 'd']
 	resultado_tres_bfs = False
@@ -372,10 +410,11 @@ def test_BFS(grafo_um,grafo_dois,grafo_tres):
 	assert all([x==y for x,y in zip(grafo_dois.bfs(grafo_dois.vert_dict['a']),resultado_dois_bfs)])
 	assert grafo_tres.bfs(grafo_tres.vert_dict['a']) == resultado_tres_bfs
 
-#Os testes a seguir equivalem ao teste anterior(BFS), porem executados 
-#em todos os valores possiveis de raiz para os grafos inicializados.
+'''Os testes a seguir equivalem ao teste anterior(BFS), porem executados 
+	em todos os valores possiveis de raiz para os grafos inicializados.'''
 
-#parametrize do primeiro grafo
+
+'''parametrize do primeiro grafo'''
 @pytest.mark.parametrize("raizBFS1,resultadoBFS1", [
     ('a',['a', 'b', 'c', 'f', 'd', 'e']),
     ('b',['b', 'a', 'd', 'e', 'c', 'f']),
@@ -388,7 +427,7 @@ def test_BFS(grafo_um,grafo_dois,grafo_tres):
 def test_grafoUmBFS(grafo_um,raizBFS1,resultadoBFS1):
 	assert grafo_um.bfs(grafo_um.vert_dict[raizBFS1]) == resultadoBFS1
 
-#parametrize do segundo grafo
+'''parametrize do segundo grafo'''
 @pytest.mark.parametrize("raizBFS2,resultadoBFS2", [
     ('a',['a', 'b', 'c', 'd']),
     ('b',['b', 'a', 'c', 'd']),
@@ -398,7 +437,7 @@ def test_grafoUmBFS(grafo_um,raizBFS1,resultadoBFS1):
 def test_grafoDoisBFS(grafo_dois,raizBFS2,resultadoBFS2):
 	assert grafo_dois.bfs(grafo_dois.vert_dict[raizBFS2]) == resultadoBFS2
 
-#parametrize do terceiro grafo
+'''parametrize do terceiro grafo'''
 @pytest.mark.parametrize("raizBFS3,resultadoBFS3", [
     ('a',False),
     ('b',False),
@@ -419,54 +458,190 @@ def test_diametro(grafo_um,grafo_dois,grafo_tres):
 @pytest.mark.parametrize("Conexo,Arvore", [
     (True,True),
 ])
-def test_geral_arvore(arvore_um,arvore_dois,arvore_tres,Conexo,Arvore):
-	assert arvore_um[0].conexo() == Conexo
-	assert arvore_dois[0].conexo() == Conexo
-	assert arvore_tres[0].conexo() == Conexo
+def test_geral_arvore(arvore_um_random,arvore_dois_random,arvore_tres_random,Conexo,Arvore):
+	assert arvore_um_random[0].conexo() == Conexo
+	assert arvore_dois_random[0].conexo() == Conexo
+	assert arvore_tres_random[0].conexo() == Conexo
 
-	assert arvore_um[0].isTree() == Arvore
-	assert arvore_dois[0].isTree() == Arvore
-	assert arvore_tres[0].isTree() == Arvore
+	assert arvore_um_random[0].isTree() == Arvore
+	assert arvore_dois_random[0].isTree() == Arvore
+	assert arvore_tres_random[0].isTree() == Arvore
+
+@pytest.mark.parametrize("vertice1", [
+    ('0'),
+    ('1'),
+    ('2'),
+    ('3'),
+    ('4'),
+    ('5'),
+])
+def test_arvoreUmKruskal(arvore_um_kruskal,vertice1):
+
+	for vert in arvore_um_kruskal[0]:
+		make_set(vert)
+
+	assert find_set(arvore_um_kruskal[0].vert_dict[vertice1]) == arvore_um_kruskal[0].vert_dict[vertice1]
+
+	'''Nao sabemos fazer asser em diferenca com o pytest. Portanto, para isso foi usado um assert fixo.'''
+	
+	assert find_set(arvore_um_kruskal[0].vert_dict['5']) != arvore_um_kruskal[0].vert_dict['3']
+	
+	union(arvore_um_kruskal[0].vert_dict['3'],arvore_um_kruskal[0].vert_dict['4'])
+	union(arvore_um_kruskal[0].vert_dict['2'],arvore_um_kruskal[0].vert_dict['3'])
+	union(arvore_um_kruskal[0].vert_dict['0'],arvore_um_kruskal[0].vert_dict['5'])
+	union(arvore_um_kruskal[0].vert_dict['3'],arvore_um_kruskal[0].vert_dict['5'])
+	union(arvore_um_kruskal[0].vert_dict['1'],arvore_um_kruskal[0].vert_dict['5'])
+	
+	'''Os valores foram previamente calculados. Esta eh a razao das fixtures estarem com random.seeds setadas.'''
+	assert arvore_um_kruskal[0].vert_dict['3'].rank == 0
+	assert arvore_um_kruskal[0].vert_dict['4'].rank == 1
+	assert arvore_um_kruskal[0].vert_dict['2'].rank == 0
+	assert arvore_um_kruskal[0].vert_dict['5'].rank == 2
+	assert arvore_um_kruskal[0].vert_dict['1'].rank == 0
+
+@pytest.mark.parametrize("vertice2", [
+    ('0'),
+    ('2'),
+    ('5'),
+    ('8'),
+    ('11'),
+    ('14'),
+    ('17'),
+])
+def test_arvoreUmKruskal(arvore_dois_kruskal,vertice2):
+
+	for vert in arvore_dois_kruskal[0]:
+		make_set(vert)
+
+	assert find_set(arvore_dois_kruskal[0].vert_dict[vertice2]) == arvore_dois_kruskal[0].vert_dict[vertice2]
+
+	'''Nao sabemos fazer asser em diferenca com o pytest. Portanto, para isso foi usado um assert fixo.'''
+	
+	assert find_set(arvore_dois_kruskal[0].vert_dict['11']) != arvore_dois_kruskal[0].vert_dict['16']
+	
+	union(arvore_dois_kruskal[0].vert_dict['4'],arvore_dois_kruskal[0].vert_dict['8'])
+	union(arvore_dois_kruskal[0].vert_dict['7'],arvore_dois_kruskal[0].vert_dict['15'])
+	union(arvore_dois_kruskal[0].vert_dict['6'],arvore_dois_kruskal[0].vert_dict['8'])
+	union(arvore_dois_kruskal[0].vert_dict['2'],arvore_dois_kruskal[0].vert_dict['9'])
+	union(arvore_dois_kruskal[0].vert_dict['2'],arvore_dois_kruskal[0].vert_dict['4'])
+	
+	'''Os valores foram previamente calculados. Esta eh a razao das fixtures estarem com random.seeds setadas.'''
+	assert arvore_dois_kruskal[0].vert_dict['0'].rank == 0
+	assert arvore_dois_kruskal[0].vert_dict['11'].rank == 0
+	assert arvore_dois_kruskal[0].vert_dict['8'].rank == 2
+	assert arvore_dois_kruskal[0].vert_dict['17'].rank == 0
+	assert arvore_dois_kruskal[0].vert_dict['1'].rank == 0
+	assert arvore_dois_kruskal[0].vert_dict['7'].rank == 0
+
+'''O TERCEIRO FIXTURE SERIA SEMELHANTE AOS DOIS PRIMEIROS.'''
+
+def test_MSTkruskal(grafo_completo_um,grafo_completo_dois,grafo_completo_tres):
+	n1 = grafo_completo_um.num_vert
+	n2 = grafo_completo_dois.num_vert
+	n3 = grafo_completo_tres.num_vert
+
+	r1 = [('3', '4', 0.10324779991117994), ('2', '3', 0.1693780871255699), ('0', '5', 0.2598274474889769), ('3', '5', 0.31913914884928973), ('1', '5', 0.5729406692492218)]
+
+
+	'''teste rapido do numero de arestas do grafo completo'''
+
+	assert grafo_completo_um.num_arestas == n1*((n1-1)/2)
+	assert grafo_completo_dois.num_arestas == n2*((n2-1)/2)
+	assert grafo_completo_tres.num_arestas == n3*((n3-1)/2)
+
+	'''Teste na lista de retorno do MST_Kruskal'''
+
+	assert len(MST_Kruskal(grafo_completo_um)) == n1-1
+	assert len(MST_Kruskal(grafo_completo_dois)) == n2-1
+	assert len(MST_Kruskal(grafo_completo_tres)) == n3-1 
+
+	'''Teste de igualdade na lista de retorno do MST_Kruskal.'''
+	assert MST_Kruskal(grafo_completo_um) == r1 
+
+
+
+	
 
 ############################ MAIN E FUNCOES AUXILIARES PARA A MAIN.##########################
 
-#Funcao destinada a execucao de 500 vezes para um metodo de gerar arvores aleatorias. O metodo nos da a certeza de
-#ser uma arvore o resultado do passeio aleatorio, e utiliza diametro deste passeio para calcular a media dos passeios,
-#apos 500 execucoes.
-#Entrada:numero Vertices para o passeio aleatorio
-#Saida: Int referente a media de diametro de 500 execucoes no passeio.
+'''#Funcao destinada a execucao de 500 vezes para um metodo de gerar arvores aleatorias. O metodo nos da a certeza de
+ser uma arvore o resultado do passeio aleatorio, e utiliza diametro deste passeio para calcular a media dos passeios,
+apos 500 execucoes.
+
+Entrada:Numero Vertices para o passeio aleatorio
+Saida: Int referente a media de diametro de 500 execucoes no passeio.'''
 
 @timeit
 def execute(nVertic):
 	somador = 0
 	arvores = 0
-	for _ in itertools.repeat(None,10):
+	for _ in itertools.repeat(None,20):
 		grafo,diametro = random_tree_kruskal(nVertic)
 		if grafo.isTree():
 			somador += diametro
 			arvores += 1
-	if arvores == 10:
-		return somador/10
+	if arvores == 20:
+		return somador/20
 
 
-def fileRandomWalk():
-	with open("randomwalk.txt", "w") as f:
-		r1 = execute(250)
-		f.write('250 ' + str(r1) + '\n')
-		r2 = execute(500)
-		f.write('500 ' + str(r2) + '\n')
-		r3 = execute(750)
-		f.write('750 ' + str(r3) + '\n')
-		r4 = execute(1000)
-		f.write('1000 ' + str(r4) + '\n')
-		r5 = execute(1250)
-		f.write('1250 ' + str(r5) + '\n')
-		r6 = execute(1500)
-		f.write('1500 ' + str(r6) + '\n')
-		r7 = execute(1750)
-		f.write('1750 ' + str(r7) + '\n')
-		r8 = execute(2000)
-		f.write('2000 ' + str(r8) + '\n')
+
+def fileRandomWalk(opt):
+	if opt == 1:
+		with open("randomwalk.txt", "w") as f:
+			r1 = execute(250)
+			f.write('250 ' + str(r1) + '\n')
+			r2 = execute(500)
+			f.write('500 ' + str(r2) + '\n')
+			r3 = execute(750)
+			f.write('750 ' + str(r3) + '\n')
+			r4 = execute(1000)
+			f.write('1000 ' + str(r4) + '\n')
+			r5 = execute(1250)
+			f.write('1250 ' + str(r5) + '\n')
+			r6 = execute(1500)
+			f.write('1500 ' + str(r6) + '\n')
+			r7 = execute(1750)
+			f.write('1750 ' + str(r7) + '\n')
+			r8 = execute(2000)
+			f.write('2000 ' + str(r8) + '\n')
+	elif opt == 2:
+		with open("kruskal.txt", "w") as f:
+			r1 = execute(250)
+			f.write('250 ' + str(r1) + '\n')
+			r2 = execute(500)
+			f.write('500 ' + str(r2) + '\n')
+			r3 = execute(750)
+			f.write('750 ' + str(r3) + '\n')
+			r4 = execute(1000)
+			f.write('1000 ' + str(r4) + '\n')
+			r5 = execute(1250)
+			f.write('1250 ' + str(r5) + '\n')
+			r6 = execute(1500)
+			f.write('1500 ' + str(r6) + '\n')
+			r7 = execute(1750)
+			f.write('1750 ' + str(r7) + '\n')
+			r8 = execute(2000)
+			f.write('2000 ' + str(r8) + '\n')
+	# elif opt == 3:
+	# 	with open("prim.txt", "w") as f:
+	# 		r1 = execute(250)
+	# 		f.write('250 ' + str(r1) + '\n')
+	# 		r2 = execute(500)
+	# 		f.write('500 ' + str(r2) + '\n')
+	# 		r3 = execute(750)
+	# 		f.write('750 ' + str(r3) + '\n')
+	# 		r4 = execute(1000)
+	# 		f.write('1000 ' + str(r4) + '\n')
+	# 		r5 = execute(1250)
+	# 		f.write('1250 ' + str(r5) + '\n')
+	# 		r6 = execute(1500)
+	# 		f.write('1500 ' + str(r6) + '\n')
+	# 		r7 = execute(1750)
+	# 		f.write('1750 ' + str(r7) + '\n')
+	# 		r8 = execute(2000)
+	# 		f.write('2000 ' + str(r8) + '\n')
+
+
 
 def fit(fun, x, y):
 	a, b = curve_fit(fun, x, y)
@@ -474,33 +649,40 @@ def fit(fun, x, y):
 
 @timeit
 def main():
-	g1,d = random_tree_kruskal(2000)
-	#g2,d = random_tree_random_walk(250)
-	print(d)
-	# fileRandomWalk()
-	# alg = sys.argv[1]
-	# if alg == 'randomwalk':
-	# 	fun = lambda x, a: a * np.power(x, 1/2)
-	# 	p = r'$\times \sqrt{n}$'
-	# elif alg == 'kruskal' or alg == 'prim':
-	# 	fun = lambda x, a: a * np.power(x, 1/3)
-	# 	p = r'$\times \sqrt[3]{n}$'
-	# else:
-	# 	print("Algoritmo inválido:", alg)
-	# lines = sys.stdin.readlines()
-	# data = np.array([list(map(float, line.split())) for line in lines])
-	# n = data[:, 0]
-	# data = data[:, 1]
-	# a, fitted = fit(fun, n, data)
-	# plt.plot(n, data, 'o', label=alg.capitalize())
-	# plt.plot(n, fitted, label= str(a) + p, color='grey')
-	# plt.xlabel('Número de vértices')
-	# plt.ylabel('Diâmetro')
-	# plt.legend()
-	# plt.savefig(alg + '.pdf')
+	# g1,d = random_tree_kruskal(6)
+	# #g2,d = random_tree_random_walk(250)
+	# print(d)
+	alg = sys.argv[1]
+	if alg == 'randomwalk':
+		fileRandomWalk(1)
+		fun = lambda x, a: a * np.power(x, 1/2)
+		p = r'$\times \sqrt{n}$'
+	elif alg == 'kruskal' or alg == 'prim':
+		fileRandomWalk(2)
+		fun = lambda x, a: a * np.power(x, 1/3)
+		p = r'$\times \sqrt[3]{n}$'
+	else:
+		print("Algoritmo inválido:", alg)
+	lines = sys.stdin.readlines()
+	data = np.array([list(map(float, line.split())) for line in lines])
+	n = data[:, 0]
+	data = data[:, 1]
+	a, fitted = fit(fun, n, data)
+	plt.plot(n, data, 'o', label=alg.capitalize())
+	plt.plot(n, fitted, label= str(a) + p, color='grey')
+	plt.xlabel('Número de vértices')
+	plt.ylabel('Diâmetro')
+	plt.legend()
+	plt.savefig(alg + '.pdf')
 
 
 
 
 if __name__ == '__main__':
 	main()
+
+#pytest T1.py -rf
+#python T1.py randomwalk < randomwalk.txt || python T1.py kruskal < kruskal.txt
+#python -m cProfile -s tottime T1.py
+
+
