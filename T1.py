@@ -59,10 +59,13 @@ class Vertice():
 		return str(self.idx) + ' adjacente' + str([x.idx for x in self.listaAdj])
 		#return str(self.idx)
 
+
+
 #Grafo implementado com a estrutura de dados dicionario do python.
 class Grafo():
 	def __init__(self):
 		self.vert_dict = {}
+		self.aresta_dict = {}
 		self.num_vert = 0
 		self.num_arestas = 0
 
@@ -96,6 +99,7 @@ class Grafo():
 			self.add_vert(para)
 		self.vert_dict[de].add_vizinho(self.vert_dict[para], custo)
 		self.vert_dict[para].add_vizinho(self.vert_dict[de], custo)
+		self.aresta_dict[custo] = de,para
 
 
 	def showListaAdjGlobal(self):
@@ -209,7 +213,7 @@ def make_set(x):
 	x.rank = 0
 
 
-@timeit
+
 def grafo_completo_com_peso(n):
 	G = Grafo()
 	for i in range(n):
@@ -244,44 +248,22 @@ def random_tree_random_walk(n):
 		u = v
 	return G,G.diametro()
 
-#@timeit
+
+
 def random_tree_kruskal(n):
 	GFinal = Grafo()
 	G = grafo_completo_com_peso(n)
 	arestasFinais = MST_Kruskal(G)
 	for aresta in arestasFinais:
-		v1 = aresta[0]
-		v2 = aresta[1]
-		peso = aresta[2]
-		if v1 not in GFinal.vertices:
-			GFinal.add_vert(v1)
-		if v2 not in GFinal.vertices:
-			GFinal.add_vert(v2)
-		GFinal.add_aresta(v1,v2,peso)
-	#print(GFinal.num_vert,GFinal.num_arestas)
+		GFinal.add_aresta(aresta[0],aresta[1])
 	return GFinal,GFinal.diametro()
 
 
-
-@timeit
 def sort_crescente(grafo):
-	arestas = {}
-	for verticeDE in grafo:
-		for verticePARA in verticeDE.get_conexoes():
-			#primeira aresta
-			verticeAID = verticeDE.get_idx()
-			#segunda aresta
-			verticeBID = verticePARA.get_idx()
-			#peso da aresta
-			peso = verticeDE.get_peso(verticePARA)
-			#como vai ser adicionado na lista de arestas. E possivel acessar depois por ver.idx.
-			arestas[peso] = verticeAID,verticeBID
-	#sort em ordem crescente o atributo de peso.
-	arestasSorted = sorted(arestas.items(), key=operator.itemgetter(0))
+	arestasSorted = sorted(grafo.aresta_dict.items(), key=operator.itemgetter(0))
 	DictSorted = {k: v for k, v in arestasSorted}
 	return DictSorted
 			
-#@timeit
 def MST_Kruskal(grafo):
 	A = []
 	for vertice in grafo:
@@ -460,17 +442,20 @@ def test_geral_arvore(arvore_um,arvore_dois,arvore_tres,Conexo,Arvore):
 #apos 500 execucoes.
 #Entrada:numero Vertices para o passeio aleatorio
 #Saida: Int referente a media de diametro de 500 execucoes no passeio.
+
+@timeit
 def execute(nVertic):
 	somador = 0
 	arvores = 0
-	for _ in itertools.repeat(None,5):
+	for _ in itertools.repeat(None,10):
 		grafo,diametro = random_tree_kruskal(nVertic)
 		if grafo.isTree():
 			somador += diametro
 			arvores += 1
-	if arvores == 5:
-		return somador/5
-#@timeit
+	if arvores == 10:
+		return somador/10
+
+
 def fileRandomWalk():
 	with open("randomwalk.txt", "w") as f:
 		r1 = execute(250)
@@ -494,60 +479,32 @@ def fit(fun, x, y):
 	a, b = curve_fit(fun, x, y)
 	return round(a[0], 2), fun(x, a)
 
-#@timeit
+@timeit
 def main():
-	g1,d = random_tree_kruskal(2000)
+	#g1,d = random_tree_kruskal(2000)
 	#g2,d = random_tree_random_walk(250)
-	print(d)
-	# fileRandomWalk()
-	# alg = sys.argv[1]
-	# if alg == 'randomwalk':
-	# 	fun = lambda x, a: a * np.power(x, 1/2)
-	# 	p = r'$\times \sqrt{n}$'
-	# elif alg == 'kruskal' or alg == 'prim':
-	# 	fun = lambda x, a: a * np.power(x, 1/3)
-	# 	p = r'$\times \sqrt[3]{n}$'
-	# else:
-	# 	print("Algoritmo inválido:", alg)
-	# lines = sys.stdin.readlines()
-	# data = np.array([list(map(float, line.split())) for line in lines])
-	# n = data[:, 0]
-	# data = data[:, 1]
-	# a, fitted = fit(fun, n, data)
-	# plt.plot(n, data, 'o', label=alg.capitalize())
-	# plt.plot(n, fitted, label= str(a) + p, color='grey')
-	# plt.xlabel('Número de vértices')
-	# plt.ylabel('Diâmetro')
-	# plt.legend()
-	# plt.savefig(alg + '.pdf')
-
-	# g = Grafo()
-	# g.add_vert('1')
-	# g.add_vert('2')
-	# g.add_vert('3')
-	# g.add_vert('4')
-	# g.add_vert('5')
-	# g.add_vert('6')
-	# g.add_vert('7')
-	# g.add_vert('8')
-	# g.add_vert('9')
-	# g.add_vert('10')
-	# g.add_vert('11')
-	# g.add_vert('12')
-
-	# g.add_aresta('1', '2',0.1)  
-	# g.add_aresta('1', '3',0.2)
-	# g.add_aresta('1', '4',0.1)
-	# g.add_aresta('2', '5',0.4)
-	# g.add_aresta('2', '6',0.5)
-	# g.add_aresta('4', '7',0.1)
-	# g.add_aresta('4', '8',0.11)
-	# g.add_aresta('5', '9',0.12)
-	# #aresta de ciclo
-	# g.add_aresta('5', '10')
-	# g.add_aresta('6', '10')
-	# g.add_aresta('7', '11')
-	# g.add_aresta('7', '12')
+	#print(d)
+	fileRandomWalk()
+	alg = sys.argv[1]
+	if alg == 'randomwalk':
+		fun = lambda x, a: a * np.power(x, 1/2)
+		p = r'$\times \sqrt{n}$'
+	elif alg == 'kruskal' or alg == 'prim':
+		fun = lambda x, a: a * np.power(x, 1/3)
+		p = r'$\times \sqrt[3]{n}$'
+	else:
+		print("Algoritmo inválido:", alg)
+	lines = sys.stdin.readlines()
+	data = np.array([list(map(float, line.split())) for line in lines])
+	n = data[:, 0]
+	data = data[:, 1]
+	a, fitted = fit(fun, n, data)
+	plt.plot(n, data, 'o', label=alg.capitalize())
+	plt.plot(n, fitted, label= str(a) + p, color='grey')
+	plt.xlabel('Número de vértices')
+	plt.ylabel('Diâmetro')
+	plt.legend()
+	plt.savefig(alg + '.pdf')
 
 
 
