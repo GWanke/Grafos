@@ -261,15 +261,14 @@ def random_tree_kruskal(n):
 
 def sort_crescente(grafo):
 	arestasSorted = sorted(grafo.aresta_dict.items(), key=operator.itemgetter(0))
-	DictSorted = {k: v for k, v in arestasSorted}
-	return DictSorted
+	return arestasSorted
 			
 def MST_Kruskal(grafo):
 	A = []
 	for vertice in grafo:
 		make_set(vertice)
 	arestas = sort_crescente(grafo)
-	for aresta in arestas.items():
+	for aresta in arestas:
 		v1 = aresta[1][0]
 		v2 = aresta[1][1]
 		peso = aresta[0]
@@ -481,9 +480,9 @@ def fit(fun, x, y):
 
 @timeit
 def main():
-	#g1,d = random_tree_kruskal(2000)
-	#g2,d = random_tree_random_walk(250)
-	#print(d)
+	# g1,d = random_tree_kruskal(2000)
+	# #g2,d = random_tree_random_walk(250)
+	# print(d)
 	fileRandomWalk()
 	alg = sys.argv[1]
 	if alg == 'randomwalk':
