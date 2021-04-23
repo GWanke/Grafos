@@ -65,7 +65,8 @@ class Vertice():
 class Grafo():
 	def __init__(self):
 		self.vert_dict = {}
-		self.aresta_dict = {}
+		#self.aresta_dict = {}
+		self.aresta_list = []
 		self.num_vert = 0
 		self.num_arestas = 0
 
@@ -99,7 +100,9 @@ class Grafo():
 			self.add_vert(para)
 		self.vert_dict[de].add_vizinho(self.vert_dict[para], custo)
 		self.vert_dict[para].add_vizinho(self.vert_dict[de], custo)
-		self.aresta_dict[custo] = de,para
+		ItemAresta = de,para,custo
+		#self.aresta_dict[custo] = de,para
+		self.aresta_list.append(ItemAresta)
 
 
 	def showListaAdjGlobal(self):
@@ -204,10 +207,12 @@ def link(x,y):
 	else:
 		x.pai = y
 		if x.rank == y.rank:
-			y.rank = y.rank + 1
+			y.rank += + 1
 
 def union(x,y):
 	link(find_set(x),find_set(y))
+
+
 def make_set(x):
 	x.pai = x
 	x.rank = 0
@@ -215,15 +220,12 @@ def make_set(x):
 
 
 def grafo_completo_com_peso(n):
-	G = Grafo()
-	for i in range(n):
-		G.add_vert(str(i))
+	G=Grafo()
 	for i in range(0,n):
 		for j in range(i+1,n):
-			G.add_aresta(G.vert_dict[str(i)].idx,G.vert_dict[str(j)].idx,random.uniform(0,1))
+			G.add_aresta(str(i),str(j),random.uniform(0,1))
 	#print(n*((n-1)/2) == G.num_arestas) #->>>>Teste	
 	return G
-
 
 ####Passeios aleatorios####
 
@@ -260,7 +262,7 @@ def random_tree_kruskal(n):
 
 
 def sort_crescente(grafo):
-	arestasSorted = sorted(grafo.aresta_dict.items(), key=operator.itemgetter(0))
+	arestasSorted = sorted(grafo.aresta_list, key = operator.itemgetter(2))
 	return arestasSorted
 			
 def MST_Kruskal(grafo):
@@ -269,9 +271,9 @@ def MST_Kruskal(grafo):
 		make_set(vertice)
 	arestas = sort_crescente(grafo)
 	for aresta in arestas:
-		v1 = aresta[1][0]
-		v2 = aresta[1][1]
-		peso = aresta[0]
+		v1 = aresta[0]
+		v2 = aresta[1]
+		peso = aresta[2]
 		if find_set(grafo.vert_dict[v1]) != find_set(grafo.vert_dict[v2]):
 			arestaAdicionada = v1,v2,peso
 			A.append(arestaAdicionada)
