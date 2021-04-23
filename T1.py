@@ -100,9 +100,8 @@ class Grafo():
 			self.add_vert(para)
 		self.vert_dict[de].add_vizinho(self.vert_dict[para], custo)
 		self.vert_dict[para].add_vizinho(self.vert_dict[de], custo)
-		ItemAresta = de,para,custo
-		#self.aresta_dict[custo] = de,para
-		self.aresta_list.append(ItemAresta)
+		itemAresta = de,para,custo
+		self.aresta_list.append(itemAresta)
 
 
 	def showListaAdjGlobal(self):
@@ -189,9 +188,6 @@ class Grafo():
 		if self.conexo():
 			return True
 		return False
-		# s = list(self.vert_dict.values())[0]
-		# self.bfs(s)
-		# return conexo(self)
 
 
 ####Funcoes auxiliares PRIM e KRUSKAL####
@@ -260,17 +256,13 @@ def random_tree_kruskal(n):
 		GFinal.add_aresta(aresta[0],aresta[1])
 	return GFinal,GFinal.diametro()
 
-
-def sort_crescente(grafo):
-	arestasSorted = sorted(grafo.aresta_list, key = operator.itemgetter(2))
-	return arestasSorted
 			
 def MST_Kruskal(grafo):
 	A = []
 	for vertice in grafo:
 		make_set(vertice)
-	arestas = sort_crescente(grafo)
-	for aresta in arestas:
+	grafo.aresta_list.sort(key = operator.itemgetter(2))
+	for aresta in grafo.aresta_list:
 		v1 = aresta[0]
 		v2 = aresta[1]
 		peso = aresta[2]
@@ -482,30 +474,30 @@ def fit(fun, x, y):
 
 @timeit
 def main():
-	# g1,d = random_tree_kruskal(2000)
-	# #g2,d = random_tree_random_walk(250)
-	# print(d)
-	fileRandomWalk()
-	alg = sys.argv[1]
-	if alg == 'randomwalk':
-		fun = lambda x, a: a * np.power(x, 1/2)
-		p = r'$\times \sqrt{n}$'
-	elif alg == 'kruskal' or alg == 'prim':
-		fun = lambda x, a: a * np.power(x, 1/3)
-		p = r'$\times \sqrt[3]{n}$'
-	else:
-		print("Algoritmo inválido:", alg)
-	lines = sys.stdin.readlines()
-	data = np.array([list(map(float, line.split())) for line in lines])
-	n = data[:, 0]
-	data = data[:, 1]
-	a, fitted = fit(fun, n, data)
-	plt.plot(n, data, 'o', label=alg.capitalize())
-	plt.plot(n, fitted, label= str(a) + p, color='grey')
-	plt.xlabel('Número de vértices')
-	plt.ylabel('Diâmetro')
-	plt.legend()
-	plt.savefig(alg + '.pdf')
+	g1,d = random_tree_kruskal(2000)
+	#g2,d = random_tree_random_walk(250)
+	print(d)
+	# fileRandomWalk()
+	# alg = sys.argv[1]
+	# if alg == 'randomwalk':
+	# 	fun = lambda x, a: a * np.power(x, 1/2)
+	# 	p = r'$\times \sqrt{n}$'
+	# elif alg == 'kruskal' or alg == 'prim':
+	# 	fun = lambda x, a: a * np.power(x, 1/3)
+	# 	p = r'$\times \sqrt[3]{n}$'
+	# else:
+	# 	print("Algoritmo inválido:", alg)
+	# lines = sys.stdin.readlines()
+	# data = np.array([list(map(float, line.split())) for line in lines])
+	# n = data[:, 0]
+	# data = data[:, 1]
+	# a, fitted = fit(fun, n, data)
+	# plt.plot(n, data, 'o', label=alg.capitalize())
+	# plt.plot(n, fitted, label= str(a) + p, color='grey')
+	# plt.xlabel('Número de vértices')
+	# plt.ylabel('Diâmetro')
+	# plt.legend()
+	# plt.savefig(alg + '.pdf')
 
 
 
