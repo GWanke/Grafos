@@ -97,8 +97,6 @@ class Grafo():
 		self.vert_dict[de].add_vizinho(self.vert_dict[para], custo)
 		self.vert_dict[para].add_vizinho(self.vert_dict[de], custo)
 
-	def show_aresta(self):
-		return self.vert_dict.keys()
 
 	def showListaAdjGlobal(self):
 		for vertex in self:
@@ -106,7 +104,7 @@ class Grafo():
 
 	@property
 	def vertices(self):
-		return self.vert_dict.values()
+		return self.vert_dict.keys()
    
 	#Realiza o BFS na classe grafo.
 	# Entrada: raiz -> Vértice
@@ -249,8 +247,21 @@ def random_tree_random_walk(n):
 
 def random_tree_kruskal(n):
 	G = grafo_completo_com_peso(n)
-	teste = MST_Kruskal(G)
-	print(teste)
+	GFinal = Grafo()
+	arestasFinais = MST_Kruskal(G)
+	for aresta in arestasFinais:
+		v1 = aresta[0]
+		v2 = aresta[1]
+		peso = aresta[2]
+		if v1 not in GFinal.vertices:
+			GFinal.add_vert(v1)
+		if v2 not in GFinal.vertices:
+			GFinal.add_vert(v2)
+		GFinal.add_aresta(v1,v2,peso)
+		#for vertice in GFinal:
+	return GFinal
+
+
 
 
 def sort_crescente(grafo):
@@ -280,11 +291,13 @@ def MST_Kruskal(grafo):
 	for vertice in grafo:
 		make_set(vertice)
 	arestas = sort_crescente(grafo)
-	for aresta in list(arestas.keys()):
-		v1 = aresta[0]
-		v2 = aresta[1]
+	for aresta in arestas.items():
+		v1 = aresta[0][0]
+		v2 = aresta[0][1]
+		peso = aresta[1]
 		if find_set(grafo.vert_dict[v1]) != find_set(grafo.vert_dict[v2]):
-			A.append(aresta)
+			arestaAdicionada = v1,v2,peso
+			A.append(arestaAdicionada)
 			union(grafo.vert_dict[v1],grafo.vert_dict[v2])
 	return A
 
@@ -493,7 +506,9 @@ def fit(fun, x, y):
 
 @timeit
 def main():
-	random_tree_kruskal(7)
+	g1 = random_tree_kruskal(250)
+	g2,d = random_tree_random_walk(250)
+	print(g1.diametro(),d)
 	# fileRandomWalk()
 	# alg = sys.argv[1]
 	# if alg == 'randomwalk':
