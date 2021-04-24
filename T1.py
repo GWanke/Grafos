@@ -190,7 +190,9 @@ class Grafo():
 		return False
 
 
-####Funcoes auxiliares PRIM e KRUSKAL####
+####Funcoes auxiliares para o algoritmo de KRUSKAL####
+
+### Estruturas de dados para conjuntos disjuntos retiradas do livro do Cormen
 
 def find_set(x):
 	if x != x.pai:
@@ -214,6 +216,9 @@ def make_set(x):
 	x.rank = 0
 
 
+# Objetivo: Gerar um grafo ponderado
+# Entrada: n -> int (o número de vértices)
+# Saída: G -> objeto da classe Grafo (Grafo com pesos de valores entre 0 e 1 nas arestas)
 
 def grafo_completo_com_peso(n):
 	G=Grafo()
@@ -247,6 +252,10 @@ def random_tree_random_walk(n):
 
 
 
+# Objetivo: Realiza um passeio utilizando o algoritmo de kruskal
+# Entrada: int (a quantidade de vértices, onde n > 0)
+# Saída: A árvore (G) e seu diametro.
+
 def random_tree_kruskal(n):
 	GFinal = Grafo()
 	G = grafo_completo_com_peso(n)
@@ -255,7 +264,11 @@ def random_tree_kruskal(n):
 		GFinal.add_aresta(aresta[0],aresta[1])
 	return GFinal,GFinal.diametro()
 
-			
+
+# Objetivo: Realiza a execução do algoritmo de Kruskal, retornando uma árvore geradora mínima
+# Entrada: grafo -> objeto da classe Grafo
+# Saída: A -> Lista que contém todas as arestas pertencentes à arvore geradora mínima
+		
 def MST_Kruskal(grafo):
 	A = []
 	for vertice in grafo:
