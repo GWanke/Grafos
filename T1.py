@@ -16,6 +16,7 @@ from functools import reduce
 from functools import wraps
 import time
 import operator
+import math
 
 
 #funcao utilizada como decorator para saber o tempo de execucao de um metodo.(Basta colocar @timeit em cima do mesmo).
@@ -32,11 +33,12 @@ def timeit(my_func):
     return timed
 
 class Vertice():
-	def __init__(self, no, cor = None, pai = None, dist = None, visitado = None):
+	def __init__(self, no, cor = None, pai = None, dist = None, visitado = None, chave = None):
 		self.idx = no
 		self.cor = cor
 		self.pai = pai
 		self.dist = dist
+  		self.chave = chave
 		self.visitado = visitado
 		self.listaAdj = {}
 
@@ -216,6 +218,19 @@ def make_set(x):
 	x.rank = 0
 
 
+######### Auxiliares para PRIM ############
+
+# Objetivo: Encontra o vértice de menor chave
+# Entrada: Q -> Arranjo simples que contém todos os vértices do grafo
+# Saída: Vértice de menor chave
+
+def extract_min(Q):
+    vertice_menor = min(Q, key=lambda x: x.chave)
+    return vertice_menor
+    
+    
+
+
 # Objetivo: Gerar um grafo ponderado
 # Entrada: n -> int (o número de vértices)
 # Saída: G -> objeto da classe Grafo (Grafo com pesos de valores entre 0 e 1 nas arestas)
@@ -284,6 +299,43 @@ def MST_Kruskal(grafo):
 			A.append(arestaAdicionada)
 			union(grafo.vert_dict[v1],grafo.vert_dict[v2])
 	return A
+
+
+# Objetivo: Realiza a execução do algoritmo de Prim, retornando uma árvore geradora mínima
+# Entrada: grafo, r -> onde r é um vértice arbitrário e grafo um objeto da classe Grafo
+# Saída:  tree -> Lista que contém todas as arestas pertencentes à arvore geradora mínima
+
+def MST_Prim(grafo, r):
+    tree = []
+    for vertice in grafo:
+        vertice.chave = math.inf
+        vertice.pai = None
+    r.chave = 0
+    Q = vertices
+    while Q != []:
+        u = extract_min(Q)
+        Q.remove(u)
+        for v in u.listaAdj:
+            if v in Q and peso_u_v < v.chave: # precisa ainda encontrar como acessar o peso entre u e v sem fazer busca linear 
+				v.pai = u
+				v.chave = peso_u_v
+	# necessario uma arvore para ser retornada, fernando n sabe fazer isso aqui kkk 
+
+
+
+# Objetivo: Realiza um passeio utilizando o algoritmo de prim
+# Entrada: int (a quantidade de vértices, onde n > 0)
+# Saída: A árvore (G) e seu diametro.
+
+def random_tree_prim(n):
+	GFinal = Grafo()
+	G = grafo_completo_com_peso(n)
+	r = #vertice arbitrário
+	arestasFinais = MST_Prim(G,r)
+	for aresta in arestasFinais:
+		GFinal.add_aresta(aresta[0],aresta[1])
+	return GFinal,GFinal.diametro()
+
 
 
 
