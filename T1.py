@@ -321,8 +321,7 @@ def MST_Prim(grafo, r):
 		for v in u.listaAdj:
 			if v in Q and v.get_peso(u) < v.chave: 
 				v.pai = u
-				v.chave = v.get_peso(u)
-	# necessario uma arvore para ser retornada, fernando n sabe fazer isso aqui kkk 
+				v.chave = v.get_peso(u) 
 	return tree
 
 # Objetivo: Realiza um passeio utilizando o algoritmo de prim
