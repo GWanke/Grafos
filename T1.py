@@ -38,7 +38,7 @@ class Vertice():
 		self.cor = cor
 		self.pai = pai
 		self.dist = dist
-  		self.chave = chave
+		self.chave = chave
 		self.visitado = visitado
 		self.listaAdj = {}
 
@@ -225,8 +225,10 @@ def make_set(x):
 # Saída: Vértice de menor chave
 
 def extract_min(Q):
-    vertice_menor = min(Q, key=lambda x: x.chave)
-    return vertice_menor
+	#for v in Q:
+		#print (v)
+	vertice_menor = min(Q, key=lambda x: x.chave)
+	return vertice_menor
     
     
 
@@ -306,22 +308,22 @@ def MST_Kruskal(grafo):
 # Saída:  tree -> Lista que contém todas as arestas pertencentes à arvore geradora mínima
 
 def MST_Prim(grafo, r):
-    tree = []
-    for vertice in grafo:
-        vertice.chave = math.inf
-        vertice.pai = None
-    r.chave = 0
-    Q = vertices
-    while Q != []:
-        u = extract_min(Q)
-        Q.remove(u)
-        for v in u.listaAdj:
-            if v in Q and peso_u_v < v.chave: # precisa ainda encontrar como acessar o peso entre u e v sem fazer busca linear 
+	tree = []
+	for vertice in grafo:
+		vertice.chave = math.inf
+		vertice.pai = None
+	r.chave = 0
+	Q = list(grafo)
+	while Q:
+		u = extract_min(Q)
+		Q.remove(u)
+		tree.append(u)
+		for v in u.listaAdj:
+			if v in Q and v.get_peso(u) < v.chave: 
 				v.pai = u
-				v.chave = peso_u_v
+				v.chave = v.get_peso(u)
 	# necessario uma arvore para ser retornada, fernando n sabe fazer isso aqui kkk 
-
-
+	return tree
 
 # Objetivo: Realiza um passeio utilizando o algoritmo de prim
 # Entrada: int (a quantidade de vértices, onde n > 0)
@@ -330,10 +332,11 @@ def MST_Prim(grafo, r):
 def random_tree_prim(n):
 	GFinal = Grafo()
 	G = grafo_completo_com_peso(n)
-	r = #vertice arbitrário
-	arestasFinais = MST_Prim(G,r)
-	for aresta in arestasFinais:
-		GFinal.add_aresta(aresta[0],aresta[1])
+	r = G.getRandomVertex(len(G.vertices))
+	arvore = MST_Prim(G,r)
+	for no in arvore:
+		if no.pai != None:
+			GFinal.add_aresta(no.idx,no.pai.idx,no.chave)
 	return GFinal,GFinal.diametro()
 
 
@@ -636,57 +639,57 @@ apos 500 execucoes.
 Entrada:Numero Vertices para o passeio aleatorio
 Saida: Int referente a media de diametro de 500 execucoes no passeio.'''
 
-@timeit
-def execute(nVertic):
-	somador = 0
-	arvores = 0
-	for _ in itertools.repeat(None,20):
-		grafo,diametro = random_tree_kruskal(nVertic)
-		if grafo.isTree():
-			somador += diametro
-			arvores += 1
-	if arvores == 20:
-		return somador/20
+#@timeit
+# def execute(nVertic):
+# 	somador = 0
+# 	arvores = 0
+# 	for _ in itertools.repeat(None,20):
+# 		grafo,diametro = random_tree_kruskal(nVertic)
+# 		if grafo.isTree():
+# 			somador += diametro
+# 			arvores += 1
+# 	if arvores == 20:
+# 		return somador/20
 
 
 
-def fileRandomWalk(opt):
-	if opt == 1:
-		with open("randomwalk.txt", "w") as f:
-			r1 = execute(250)
-			f.write('250 ' + str(r1) + '\n')
-			r2 = execute(500)
-			f.write('500 ' + str(r2) + '\n')
-			r3 = execute(750)
-			f.write('750 ' + str(r3) + '\n')
-			r4 = execute(1000)
-			f.write('1000 ' + str(r4) + '\n')
-			r5 = execute(1250)
-			f.write('1250 ' + str(r5) + '\n')
-			r6 = execute(1500)
-			f.write('1500 ' + str(r6) + '\n')
-			r7 = execute(1750)
-			f.write('1750 ' + str(r7) + '\n')
-			r8 = execute(2000)
-			f.write('2000 ' + str(r8) + '\n')
-	elif opt == 2:
-		with open("kruskal.txt", "w") as f:
-			r1 = execute(250)
-			f.write('250 ' + str(r1) + '\n')
-			r2 = execute(500)
-			f.write('500 ' + str(r2) + '\n')
-			r3 = execute(750)
-			f.write('750 ' + str(r3) + '\n')
-			r4 = execute(1000)
-			f.write('1000 ' + str(r4) + '\n')
-			r5 = execute(1250)
-			f.write('1250 ' + str(r5) + '\n')
-			r6 = execute(1500)
-			f.write('1500 ' + str(r6) + '\n')
-			r7 = execute(1750)
-			f.write('1750 ' + str(r7) + '\n')
-			r8 = execute(2000)
-			f.write('2000 ' + str(r8) + '\n')
+# def fileRandomWalk(opt):
+# 	if opt == 1:
+# 		with open("randomwalk.txt", "w") as f:
+# 			r1 = execute(250)
+# 			f.write('250 ' + str(r1) + '\n')
+# 			r2 = execute(500)
+# 			f.write('500 ' + str(r2) + '\n')
+# 			r3 = execute(750)
+# 			f.write('750 ' + str(r3) + '\n')
+# 			r4 = execute(1000)
+# 			f.write('1000 ' + str(r4) + '\n')
+# 			r5 = execute(1250)
+# 			f.write('1250 ' + str(r5) + '\n')
+# 			r6 = execute(1500)
+# 			f.write('1500 ' + str(r6) + '\n')
+# 			r7 = execute(1750)
+# 			f.write('1750 ' + str(r7) + '\n')
+# 			r8 = execute(2000)
+# 			f.write('2000 ' + str(r8) + '\n')
+# 	elif opt == 2:
+# 		with open("kruskal.txt", "w") as f:
+# 			r1 = execute(250)
+# 			f.write('250 ' + str(r1) + '\n')
+# 			r2 = execute(500)
+# 			f.write('500 ' + str(r2) + '\n')
+# 			r3 = execute(750)
+# 			f.write('750 ' + str(r3) + '\n')
+# 			r4 = execute(1000)
+# 			f.write('1000 ' + str(r4) + '\n')
+# 			r5 = execute(1250)
+# 			f.write('1250 ' + str(r5) + '\n')
+# 			r6 = execute(1500)
+# 			f.write('1500 ' + str(r6) + '\n')
+# 			r7 = execute(1750)
+# 			f.write('1750 ' + str(r7) + '\n')
+# 			r8 = execute(2000)
+# 			f.write('2000 ' + str(r8) + '\n')
 	# elif opt == 3:
 	# 	with open("prim.txt", "w") as f:
 	# 		r1 = execute(250)
@@ -708,37 +711,38 @@ def fileRandomWalk(opt):
 
 
 
-def fit(fun, x, y):
-	a, b = curve_fit(fun, x, y)
-	return round(a[0], 2), fun(x, a)
+# def fit(fun, x, y):
+# 	a, b = curve_fit(fun, x, y)
+# 	return round(a[0], 2), fun(x, a)
 
 @timeit
 def main():
-	# g1,d = random_tree_kruskal(6)
-	# #g2,d = random_tree_random_walk(250)
-	# print(d)
-	alg = sys.argv[1]
-	if alg == 'randomwalk':
-		fileRandomWalk(1)
-		fun = lambda x, a: a * np.power(x, 1/2)
-		p = r'$\times \sqrt{n}$'
-	elif alg == 'kruskal' or alg == 'prim':
-		fileRandomWalk(2)
-		fun = lambda x, a: a * np.power(x, 1/3)
-		p = r'$\times \sqrt[3]{n}$'
-	else:
-		print("Algoritmo inválido:", alg)
-	lines = sys.stdin.readlines()
-	data = np.array([list(map(float, line.split())) for line in lines])
-	n = data[:, 0]
-	data = data[:, 1]
-	a, fitted = fit(fun, n, data)
-	plt.plot(n, data, 'o', label=alg.capitalize())
-	plt.plot(n, fitted, label= str(a) + p, color='grey')
-	plt.xlabel('Número de vértices')
-	plt.ylabel('Diâmetro')
-	plt.legend()
-	plt.savefig(alg + '.pdf')
+	g1,d1 = random_tree_kruskal(1500)
+	#g2,d1 = random_tree_random_walk(1500)
+	g,d = random_tree_prim(1500)
+	print(d1,d)
+	# alg = sys.argv[1]
+	# if alg == 'randomwalk':
+	# 	fileRandomWalk(1)
+	# 	fun = lambda x, a: a * np.power(x, 1/2)
+	# 	p = r'$\times \sqrt{n}$'
+	# elif alg == 'kruskal' or alg == 'prim':
+	# 	fileRandomWalk(2)
+	# 	fun = lambda x, a: a * np.power(x, 1/3)
+	# 	p = r'$\times \sqrt[3]{n}$'
+	# else:
+	# 	print("Algoritmo inválido:", alg)
+	# lines = sys.stdin.readlines()
+	# data = np.array([list(map(float, line.split())) for line in lines])
+	# n = data[:, 0]
+	# data = data[:, 1]
+	# a, fitted = fit(fun, n, data)
+	# plt.plot(n, data, 'o', label=alg.capitalize())
+	# plt.plot(n, fitted, label= str(a) + p, color='grey')
+	# plt.xlabel('Número de vértices')
+	# plt.ylabel('Diâmetro')
+	# plt.legend()
+	# plt.savefig(alg + '.pdf')
 
 
 
