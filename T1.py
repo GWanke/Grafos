@@ -301,7 +301,7 @@ def MST_Prim(grafo, r):
 		vertice.chave = math.inf
 		vertice.pai = None
 	r.chave = 0
-	#lista de vertices
+	#lista de vertices. Usando set para a checagem de um elemento no set no loop mais interno.
 	Q = set(grafo)
 	while Q:
 		#extract-min:
