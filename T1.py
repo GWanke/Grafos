@@ -17,7 +17,6 @@ from functools import wraps
 import time
 import operator
 import math
-import heapq
 
 #funcao utilizada como decorator para saber o tempo de execucao de um metodo.(Basta colocar @timeit em cima do mesmo).
 def timeit(my_func):
@@ -58,8 +57,8 @@ class Vertice():
 		return self.listaAdj[other]
 
 	def __str__(self):
-		return str(self.idx) + ' adjacente' + str([x.idx for x in self.listaAdj])
-		#return str(self.idx)
+		#return str(self.idx) + ' adjacente' + str([x.idx for x in self.listaAdj])
+		return str(self.idx)
 
 
 
@@ -67,7 +66,6 @@ class Vertice():
 class Grafo():
 	def __init__(self):
 		self.vert_dict = {}
-		#self.aresta_dict = {}
 		self.aresta_list = []
 		self.num_vert = 0
 		self.num_arestas = 0
@@ -104,11 +102,6 @@ class Grafo():
 		self.vert_dict[para].add_vizinho(self.vert_dict[de], custo)
 		itemAresta = de,para,custo
 		self.aresta_list.append(itemAresta)
-
-
-	def showListaAdjGlobal(self):
-		for vertex in self:
-			print(self.get_vert(vertex.idx))
 
 	@property
 	def vertices(self):
@@ -217,9 +210,6 @@ def make_set(x):
 	x.pai = x
 	x.rank = 0
 
-
-######### Auxiliares para PRIM ############
-
 # Objetivo: Gerar um grafo ponderado
 # Entrada: n -> int (o número de vértices)
 # Saída: G -> objeto da classe Grafo (Grafo com pesos de valores entre 0 e 1 nas arestas)
@@ -294,7 +284,6 @@ def MST_Kruskal(grafo):
 # Entrada: grafo, r -> onde r é um vértice arbitrário e grafo um objeto da classe Grafo
 # Saída:  tree -> Lista que contém todas as arestas pertencentes à arvore geradora mínima 
 
-@timeit
 def MST_Prim(grafo, r):
 	tree = []
 	for vertice in grafo:
@@ -697,7 +686,6 @@ Saida: Int referente a media de diametro de 500 execucoes no passeio.'''
 	# 		f.write('1750 ' + str(r7) + '\n')
 	# 		r8 = execute(2000)
 	# 		f.write('2000 ' + str(r8) + '\n')
-
 
 
 # def fit(fun, x, y):
