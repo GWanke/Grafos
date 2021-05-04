@@ -17,7 +17,7 @@ from functools import wraps
 import time
 import operator
 import math
-
+import heapq
 
 #funcao utilizada como decorator para saber o tempo de execucao de um metodo.(Basta colocar @timeit em cima do mesmo).
 def timeit(my_func):
@@ -220,19 +220,6 @@ def make_set(x):
 
 ######### Auxiliares para PRIM ############
 
-# Objetivo: Encontra o vértice de menor chave
-# Entrada: Q -> Arranjo simples que contém todos os vértices do grafo
-# Saída: Vértice de menor chave
-
-def extract_min(Q):
-	#for v in Q:
-		#print (v)
-	vertice_menor = min(Q, key=lambda x: x.chave)
-	return vertice_menor
-    
-    
-
-
 # Objetivo: Gerar um grafo ponderado
 # Entrada: n -> int (o número de vértices)
 # Saída: G -> objeto da classe Grafo (Grafo com pesos de valores entre 0 e 1 nas arestas)
@@ -305,24 +292,26 @@ def MST_Kruskal(grafo):
 
 # Objetivo: Realiza a execução do algoritmo de Prim, retornando uma árvore geradora mínima
 # Entrada: grafo, r -> onde r é um vértice arbitrário e grafo um objeto da classe Grafo
-# Saída:  tree -> Lista que contém todas as arestas pertencentes à arvore geradora mínima
+# Saída:  tree -> Lista que contém todas as arestas pertencentes à arvore geradora mínima 
 
+@timeit
 def MST_Prim(grafo, r):
 	tree = []
 	for vertice in grafo:
 		vertice.chave = math.inf
 		vertice.pai = None
 	r.chave = 0
-	Q = list(grafo)
+	#lista de vertices
+	Q = set(grafo)
 	while Q:
-		u = extract_min(Q)
+		#extract-min:
+		u = min(Q, key = lambda x:x.chave)
 		Q.remove(u)
 		tree.append(u)
 		for v in u.listaAdj:
 			if v in Q and v.get_peso(u) < v.chave: 
 				v.pai = u
-				v.chave = v.get_peso(u)
-	# necessario uma arvore para ser retornada, fernando n sabe fazer isso aqui kkk 
+				v.chave = v.get_peso(u) 
 	return tree
 
 # Objetivo: Realiza um passeio utilizando o algoritmo de prim
@@ -717,10 +706,10 @@ Saida: Int referente a media de diametro de 500 execucoes no passeio.'''
 
 @timeit
 def main():
-	g1,d1 = random_tree_kruskal(1500)
+	#g1,d1 = random_tree_kruskal(2000)
 	#g2,d1 = random_tree_random_walk(1500)
-	g,d = random_tree_prim(1500)
-	print(d1,d)
+	g,d = random_tree_prim(2000)
+	print(d)
 	# alg = sys.argv[1]
 	# if alg == 'randomwalk':
 	# 	fileRandomWalk(1)
